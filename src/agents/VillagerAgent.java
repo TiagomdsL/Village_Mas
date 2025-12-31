@@ -9,6 +9,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
     @Override
     protected void setup() {
         super.setup();
+        this.myRole = model.Role.VILLAGER;
 
         addBehaviour(new jade.core.behaviours.CyclicBehaviour() {
             public void action() {

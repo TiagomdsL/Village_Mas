@@ -1,6 +1,13 @@
 package agents;
 
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import jade.domain.DFService;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
 import model.Role;
 
 import java.util.HashMap;
@@ -23,6 +30,44 @@ public abstract class AbstractPlayerAgent extends Agent {
     @Override
     protected void setup() {
         System.out.println(getLocalName() + " started.");
+
+        // Registrar este agente no DF como service type "player"
+        DFAgentDescription dfd = new DFAgentDescription();
+        dfd.setName(getAID());
+        ServiceDescription sd = new ServiceDescription();
+        sd.setType("player");
+        sd.setName("Player");
+        dfd.addServices(sd);
+        try {
+            DFService.register(this, dfd);
+        } catch (FIPAException e) {
+            e.printStackTrace();
+        }
+
+        // Recebe REQUEST de role-query e responde com INFORM "ROLE:<ROLE_NAME>"
+        addBehaviour(new CyclicBehaviour(this) {
+            private final MessageTemplate mt = MessageTemplate.and(
+                    MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
+                    MessageTemplate.MatchConversationId("role-query"));
+
+            @Override
+            public void action() {
+                ACLMessage msg = myAgent.receive(mt);
+                if (msg != null) {
+                    String content = msg.getContent();
+                    if ("ROLE_REQUEST".equals(content)) {
+                        ACLMessage reply = msg.createReply();
+                        reply.setPerformative(ACLMessage.INFORM);
+                        reply.setConversationId("role-query");
+                        String roleStr = (myRole != null) ? myRole.name() : "UNASSIGNED";
+                        reply.setContent("ROLE:" + roleStr);
+                        myAgent.send(reply);
+                    }
+                } else {
+                    block();
+                }
+            }
+        });
     }
 
     protected void initBeliefs(String[] players) {

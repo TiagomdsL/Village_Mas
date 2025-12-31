@@ -8,7 +8,10 @@ import jade.wrapper.AgentController;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random; // usar em casos futuros
+import java.util.Random;
+import java.util.Collections;
+
+import model.Role;
 
 /**
  * Classe responsável por lançar um jogo de The Village
@@ -29,7 +32,6 @@ public class GameLauncher {
 
     // Comunicação
     private int maxPublicMessagesPerDay = 2; // ex: 1 para comunicação restrita
-    private boolean enforceMessageLimit = true;
 
     // Jogo
     private int maxRounds = 20;
@@ -63,20 +65,28 @@ public class GameLauncher {
             logger.start();
 
             List<String> playerNames = generatePlayerNames();
-            Object[] gmArgs = buildGameMasterArgs(playerNames);
 
-            // Criar Game Master
+            // Criar Game Master (sem args; GameMaster obtém players/roles via DF)
             AgentController gm = container.createNewAgent(
                     "GameMaster",
                     "agents.GameMasterAgent",
-                    gmArgs);
+                    null);
             gm.start();
 
-            // Criar jogadores
-            for (String player : playerNames) {
+            // Gerar e atribuir roles localmente aqui para escolher a classe do agente a
+            // criar
+            List<Role> rolePool = buildRolePool(playerNames.size());
+            Random rnd = new Random(randomSeed);
+            Collections.shuffle(rolePool, rnd);
+
+            for (int i = 0; i < playerNames.size(); i++) {
+                String player = playerNames.get(i);
+                Role role = rolePool.get(i);
+                String className = classForRole(role);
+
                 AgentController agent = container.createNewAgent(
                         player,
-                        "agents.VillagerAgent",
+                        className,
                         null);
                 agent.start();
             }
@@ -103,20 +113,45 @@ public class GameLauncher {
     }
 
     /**
-     * Constrói argumentos para o Game Master.
+     * Constrói pool de roles de acordo com as flags e número de lobisomens.
      */
-    private Object[] buildGameMasterArgs(List<String> players) {
-        return new Object[] {
-                players.toArray(new String[0]),
-                numWerewolves,
-                enableSeer,
-                enableDoctor,
-                enableHunter,
-                maxPublicMessagesPerDay,
-                enforceMessageLimit,
-                maxRounds,
-                demoMode,
-                randomSeed
+    private List<Role> buildRolePool(int playersCount) {
+        List<Role> pool = new ArrayList<>();
+
+        // adicionar lobisomens
+        int wolves = Math.min(numWerewolves, playersCount);
+        for (int i = 0; i < wolves; i++)
+            pool.add(Role.WEREWOLF);
+
+        if (enableSeer)
+            pool.add(Role.SEER);
+        if (enableDoctor)
+            pool.add(Role.DOCTOR);
+        if (enableHunter)
+            pool.add(Role.HUNTER);
+
+        // preencher o resto com VILLAGER
+        while (pool.size() < playersCount)
+            pool.add(Role.VILLAGER);
+
+        // se sobrar (menos jogadores que roles desejadas) aparar extras (remove do fim)
+        while (pool.size() > playersCount)
+            pool.remove(pool.size() - 1);
+
+        return pool;
+    }
+
+    /**
+     * Mapeia Role -> classe de agente (package 'agents').
+     */
+    private String classForRole(Role role) {
+        return switch (role) {
+            case WEREWOLF -> "agents.WerewolfAgent";
+            case SEER -> "agents.SeerAgent";
+            case DOCTOR -> "agents.DoctorAgent";
+            case HUNTER -> "agents.HunterAgent";
+            case VILLAGER -> "agents.VillagerAgent";
+            default -> "agents.VillagerAgent";
         };
     }
 
@@ -139,11 +174,7 @@ public class GameLauncher {
 
     public GameLauncher setNumPlayers(int n) {
         this.numPlayers = n;
-        return this;
-    }
-
-    public GameLauncher setNumWerewolves(int n) {
-        this.numWerewolves = n;
+        this.numWerewolves = Math.max(1, n / 5); // ajustar número de lobisomens
         return this;
     }
 

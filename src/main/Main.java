@@ -14,11 +14,10 @@ public class Main {
         // Configuração padrão (demo)
         GameLauncher launcher = new GameLauncher()
                 .setNumPlayers(10)
-                .setNumWerewolves(2)
                 .enableSeer(true)
                 .enableDoctor(true)
                 .enableHunter(true)
-                .setMessageLimit(2) // comunicação normal
+                .setMessageLimit(2)
                 .setMaxRounds(20)
                 .setSeed(42);
 
