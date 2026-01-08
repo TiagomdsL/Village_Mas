@@ -59,6 +59,8 @@ public class GameMasterAgent extends Agent {
                     MessageTemplate.MatchPerformative(ACLMessage.INFORM),
                     MessageTemplate.MatchConversationId("role-query"));
 
+            String[] players = new String[result.length];
+
             while (System.currentTimeMillis() < deadline) {
                 long wait = deadline - System.currentTimeMillis();
                 ACLMessage reply = blockingReceive(mt, wait);
@@ -70,10 +72,16 @@ public class GameMasterAgent extends Agent {
                     try {
                         Role r = Role.valueOf(content.substring(5));
                         playerRoles.put(sender, r);
+                        players[playerRoles.size() - 1] = sender;
+                        System.out.println(sender);
                     } catch (IllegalArgumentException ignored) {
                         /* resposta inválida */ }
                 }
             }
+            alivePlayers.addAll(Arrays.asList(players));
+            broadcastSystem("Game started. Night phase.");
+            nextPhase();
+
         } catch (FIPAException e) {
             e.printStackTrace();
         }
@@ -97,27 +105,7 @@ public class GameMasterAgent extends Agent {
         }
 
         // Buscar agentes "player" registrados no DF
-        DFAgentDescription template = new DFAgentDescription();
-        ServiceDescription sd = new ServiceDescription();
-        sd.setType("player");
-        template.addServices(sd);
-
-        try {
-            DFAgentDescription[] result = DFService.search(this, template);
-            String[] players = new String[result.length];
-            for (int i = 0; i < result.length; i++) {
-                players[i] = result[i].getName().getLocalName();
-            }
-
-            alivePlayers.addAll(Arrays.asList(players));
-            playerRoles = queryRolesFromDF(5000);
-
-            broadcastSystem("Game started. Night phase.");
-            nextPhase();
-        } catch (FIPAException e) {
-            e.printStackTrace();
-            broadcastSystem("No players found in DF. Game cannot start.");
-        }
+        playerRoles = queryRolesFromDF(5000);
     }
 
     private void broadcastSystem(String text) {
