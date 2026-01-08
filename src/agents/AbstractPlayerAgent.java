@@ -10,7 +10,9 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import model.Role;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,6 +28,8 @@ public abstract class AbstractPlayerAgent extends Agent {
 
     // Métrica de confiança [0,1]
     protected Map<String, Double> trust = new HashMap<>();
+
+    protected List<String> alivePlayers = new ArrayList<>();
 
     @Override
     protected void setup() {
@@ -66,6 +70,9 @@ public abstract class AbstractPlayerAgent extends Agent {
                 } else {
                     block();
                 }
+                checkAlivePlayers();
+                dyingPlayer();
+
             }
         });
     }
@@ -84,6 +91,55 @@ public abstract class AbstractPlayerAgent extends Agent {
     protected void updateTrust(String player, double delta) {
         trust.put(player, Math.max(0, Math.min(1, trust.get(player) + delta)));
     }
+
+    protected void checkAlivePlayers() {
+        MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+
+        ACLMessage msg = receive(mt);
+        if (msg == null) {
+            return;
+        }
+
+        String content = msg.getContent();
+        if (content == null) {
+            return;
+        }
+
+        // ⚠️ Só processa mensagens do tipo Players vivos
+        if (!content.startsWith("Players vivos:")) {
+            return;
+        }
+
+        String playersStr = content.replace("Players vivos:", "").trim();
+
+        alivePlayers.clear();
+
+        if (!playersStr.isEmpty()) {
+            String[] players = playersStr.split("\\s*,\\s*");
+            alivePlayers.addAll(List.of(players));
+        }
+
+        System.out.println(getLocalName() + "Alive players updated: " + alivePlayers);
+
+    }
+
+    protected void dyingPlayer() {
+        MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+
+        ACLMessage msg = receive(mt);
+        if (msg == null) {
+            return;
+        }
+        String content = msg.getContent();
+        if (content.contains("You are dead.")) {
+            System.out.println(getLocalName() + " received death notice.");
+            doDelete();
+        }
+
+
+    }
+
+
 
     protected abstract void decideAction();
 }
