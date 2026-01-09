@@ -18,6 +18,8 @@ public class HunterAgent extends VillagerAgent {
                     try {
                         MessageType messageType = MessageType.valueOf(msg.getConversationId());
                         if (messageType == MessageType.HUNTER_KILL) {
+
+                            System.out.println("FFFFFFFFFFFF");
                             handleHunter();
                         } else {}
                     } catch (IllegalArgumentException e) {

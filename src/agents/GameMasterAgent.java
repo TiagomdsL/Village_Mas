@@ -25,7 +25,6 @@ public class GameMasterAgent extends Agent {
 
     private GamePhase phase = GamePhase.NIGHT;
     private List<String>
-            allPlayers = new ArrayList<>(),
             deadPlayers = new ArrayList<>(),
             protectedPlayers = new ArrayList<>();
 
@@ -61,11 +60,11 @@ public class GameMasterAgent extends Agent {
 //                SETUP_PLAYERS = "SETUP_PLAYERS",
         public GamePhaseBehaviour() {
             registerFirstState(new SetupPlayersBehaviour(), GamePhase.SETUP.toString());
-            registerState(new AfternoonPhaseBehaviour(myAgent, 2000), GamePhase.AFTERNOON.toString());
+            registerState(new VotePhaseBehaviour(myAgent, 1), GamePhase.VOTING.toString());
 
 
-            registerTransition(GamePhase.SETUP.toString(), GamePhase.AFTERNOON.toString(), 0);
-            registerTransition(GamePhase.AFTERNOON.toString(), GamePhase.ENDED.toString(), 1);
+            registerTransition(GamePhase.SETUP.toString(), GamePhase.VOTING.toString(), 0);
+            registerTransition(GamePhase.VOTING.toString(), GamePhase.ENDED.toString(), 1);
 
         }
 
@@ -80,40 +79,41 @@ public class GameMasterAgent extends Agent {
 
         @Override
         public int onEnd() {
-            System.out.println(playerRoles);
-            broadcastSystem("Init game");
+//            System.out.println(playerRoles);
+            broadcastSystem("Init game", MessageType.SYSTEM);
+            broadcastAlivePlayers();
             return 0;
         }
     }
 
-    private class AfternoonPhaseBehaviour extends TickerBehaviour {
-        private int transition = 0;
+    private class VotePhaseBehaviour extends TickerBehaviour {
 
-        public AfternoonPhaseBehaviour(Agent a, long period) {
+        private int ticks = 0;
+        public VotePhaseBehaviour(Agent a, long period) {
             super(a, period);
         }
 
         @Override
-        public void onTick() {
-            broadcastSystem("Afternoon phase started.");
+        public void onStart() {
+            super.onStart();
+            broadcastSystem("Vote phase started.", MessageType.SYSTEM);
+        }
 
-            if ( !deadPlayers.isEmpty()) {
-                String playerDead = deadPlayers.removeFirst();
-                //System.out.println( playerRoles.remove(playerDead));
-                killPlayer(playerDead);
-                broadcastSystem("The xerife kill the Player: " + playerDead);
-            } else {
-                broadcastSystem("No players were killed by the xerife.");
+        @Override
+        public void onTick() {
+            ticks ++;
+            if (ticks >= 2) {
+                stop();
             }
-            transition = isEnded();
-            broadcastAlivePlayers();
-            stop();
         }
 
         @Override
         public int onEnd() {
+            killPlayer();
+
+            broadcastAlivePlayers();
             System.out.println("Entrou");
-            return transition;
+            return isEnded();
         }
     }
 
@@ -121,7 +121,7 @@ public class GameMasterAgent extends Agent {
         @Override
         public void action() {
 
-            broadcastSystem("Game ended.");
+            broadcastSystem("Game ended.", MessageType.SYSTEM);
 
         }
     }
@@ -176,16 +176,11 @@ public class GameMasterAgent extends Agent {
                         Role r = Role.valueOf(content.substring(5));
                         playerRoles.put(sender, r);
                         players[playerRoles.size() - 1] = sender;
-                        System.out.println(sender);
                     } catch (IllegalArgumentException ignored) {
                         /* resposta inválida */
                     }
                 }
             }
-            allPlayers.addAll(Arrays.asList(players));
-//            broadcastSystem("Game started. Night phase.");
-//            nextPhase();
-
         } catch (FIPAException e) {
             e.printStackTrace();
         }
@@ -193,29 +188,39 @@ public class GameMasterAgent extends Agent {
         return new HashMap<>(playerRoles);
     }
 
-    private void broadcastSystem(String text) {
+    private void broadcastSystem(String text, MessageType type) {
         for (String p : playerRoles.keySet()) {
             ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
             msg.addReceiver(new AID(p, AID.ISLOCALNAME));
             msg.setContent(text);
+            msg.setConversationId(type.toString());
             send(msg);
         }
         System.out.println("SYSTEM: " + text);
     }
 
     private void broadcastAlivePlayers() {
-        String players = String.join(", ",  playerRoles.keySet());
-        broadcastSystem("Players vivos:" + players);
+        String players = String.join(", ", playerRoles.keySet());
+        broadcastSystem("Players vivos:" + players, MessageType.ALIVE_PLAYERS);
         System.out.println(players);
     }
 
 
-    private void killPlayer(String player) {
-            playerRoles.remove(player);
-            ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-            msg.addReceiver(new AID(player, AID.ISLOCALNAME));
-            msg.setContent("You are dead.");
-            send(msg);
+    private void killPlayer() {
+
+        if (!deadPlayers.isEmpty()) {
+            for (String player : deadPlayers) {
+                playerRoles.remove(player);
+                ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                msg.addReceiver(new AID(player, AID.ISLOCALNAME));
+                msg.setContent("You are dead.");
+                msg.setConversationId(MessageType.KILL_NOTIFICATION.toString());
+                send(msg);
+                broadcastSystem("The Player: " + player + " is Dead.", MessageType.SYSTEM);
+            }
+        } else{
+            broadcastSystem("No one died this round.", MessageType.SYSTEM);
+        }
 
     }
 
@@ -230,7 +235,7 @@ public class GameMasterAgent extends Agent {
             }
         }
 
-        return  (werewolves == 0 || villagers == 0) ? 1 : 0;
+        return (werewolves == 0 || villagers == 0) ? 1 : 0;
     }
 
 }

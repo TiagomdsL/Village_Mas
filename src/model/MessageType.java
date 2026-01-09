@@ -9,5 +9,7 @@ public enum MessageType {
     DOCTOR_PROTECT, //o content será o nome do agente protegido quando enviado para o GameMaster ex "AgentX"
     SEER_REVEAL, //o content será o nome do agente revelado quando enviado para o GameMaster ex "AgentX"
     SEER_RECEIVE, //o content será o nome do agente espaço a sua role enviado para o Seer ex "AgentX WEREWOLF"
-    HUNTER_KILL //o content será o nome do agente morto quando enviado para o GameMaster ex "AgentX"
+    HUNTER_KILL, //o content será o nome do agente morto quando enviado para o GameMaster ex "AgentX"
+    KILL_NOTIFICATION, //o content será o nome do agente morto quando enviado para os agentes ex "AgentX"
+    ALIVE_PLAYERS //o content será a lista de jogadores vivos separados por vírgula ex "AgentX,AgentY,AgentZ"
 }

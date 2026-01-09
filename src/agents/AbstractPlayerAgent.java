@@ -70,8 +70,8 @@ public abstract class AbstractPlayerAgent extends Agent {
                 } else {
                     block();
                 }
-                checkAlivePlayers();
                 dyingPlayer();
+                checkAlivePlayers();
 
             }
         });
@@ -105,7 +105,6 @@ public abstract class AbstractPlayerAgent extends Agent {
             return;
         }
 
-        // ⚠️ Só processa mensagens do tipo Players vivos
         if (!content.startsWith("Players vivos:")) {
             return;
         }
@@ -130,16 +129,19 @@ public abstract class AbstractPlayerAgent extends Agent {
         if (msg == null) {
             return;
         }
+
         String content = msg.getContent();
         if (content.contains("You are dead.")) {
             System.out.println(getLocalName() + " received death notice.");
             doDelete();
         }
-
-
     }
 
-
+    protected abstract void handleRoleClaim(String content, String sender); // Processar revelação de papel
+    protected abstract void handleVote(String content, String sender);      // Processar voto
+    protected abstract void handleSystem(String content, String sender);    // Processar mensagem do sistema
+    protected abstract void handleTrust(String content, String sender);     // Processar confiança
 
     protected abstract void decideAction();
+
 }

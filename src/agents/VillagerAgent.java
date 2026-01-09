@@ -35,7 +35,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
         }
     }
 
-    private void handleAccusation(String content, String sender) {
+    protected void handleAccusation(String content, String sender) {
         content = content.trim();
         String[] parts = content.split(" ", 2);
         if (parts.length < 2) {
@@ -58,7 +58,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
         }
     }
 
-    private void handleTrust(String content, String sender) {
+    protected void handleTrust(String content, String sender) {
         content = content.trim();
         String[] parts = content.split(" ", 2);
         if (parts.length < 2) {
@@ -80,7 +80,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
         }
     }
 
-    private void handleRoleClaim(String content, String sender) {
+    protected void handleRoleClaim(String content, String sender) {
         content = content.trim();
         String[] parts = content.split(" ", 2);
         if (parts.length < 2) {
@@ -102,11 +102,11 @@ public class VillagerAgent extends AbstractPlayerAgent {
         }
     }
 
-    private void handleVote(String content, String sender) {
+    protected void handleVote(String content, String sender) {
         decideAction();
     }
 
-    private void handleSystem(String content, String sender) {
+    protected void handleSystem(String content, String sender) {
         // TODO
     }
 
