@@ -13,6 +13,8 @@ public class VillagerAgent extends AbstractPlayerAgent {
         this.myRole = model.Role.VILLAGER;
     }
 
+
+
     protected void processMessage(MessageType messageType, String content, String sender) { //temporario para n dar erro
         switch (messageType) {
             case ACCUSATION:

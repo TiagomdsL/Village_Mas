@@ -48,53 +48,52 @@ public abstract class AbstractPlayerAgent extends Agent {
             e.printStackTrace();
         }
 
-        // Recebe REQUEST de role-query e responde com INFORM "ROLE:<ROLE_NAME>"
-        addBehaviour(new CyclicBehaviour(this) {
+        addBehaviour(new ListenerBehavior());
+    }
 
-            @Override
-            public void action() {
-                ACLMessage msg = myAgent.receive();
-                if (msg != null) {
-                    if( msg.getConversationId().equals(MessageType.ROLE_QUERY.toString()) ){
-                        respondToRoleQuery(msg);
-                    }
-                    else if( msg.getConversationId().equals(MessageType.KILL_NOTIFICATION.toString())){
-                        dyingPlayer(msg);
-                    }
-                    else if( msg.getConversationId().equals(MessageType.ALIVE_PLAYERS.toString())){
-                        checkAlivePlayers(msg);
-                    }
-                    else if ( msg.getConversationId().equals(MessageType.SYSTEM.toString()) ) {
-                        String content = msg.getContent();
-                        if( content.contains("is Dead")){
-                            try {
-                                String deadPlayer = content
-                                        .replace("The Player:", "")
-                                        .replace("is Dead.", "")
-                                        .trim();
+    public class ListenerBehavior extends CyclicBehaviour {
+        @Override
+        public void action() {
+            ACLMessage msg = myAgent.receive();
+            if (msg != null) {
+                if( msg.getConversationId().equals(MessageType.ROLE_QUERY.toString()) ){
+                    respondToRoleQuery(msg);
+                }
+                else if( msg.getConversationId().equals(MessageType.KILL_NOTIFICATION.toString())){
+                    dyingPlayer(msg);
+                }
+                else if( msg.getConversationId().equals(MessageType.ALIVE_PLAYERS.toString())){
+                    checkAlivePlayers(msg);
+                }
+                else if ( msg.getConversationId().equals(MessageType.SYSTEM.toString()) ) {
+                    String content = msg.getContent();
+                    if( content.contains("is Dead")){
+                        try {
+                            String deadPlayer = content
+                                    .replace("The Player:", "")
+                                    .replace("is Dead.", "")
+                                    .trim();
 
-                                // Remover das estruturas internas
-                                trust.remove(deadPlayer);
-                                beliefs.remove(deadPlayer);
+                            // Remover das estruturas internas
+                            trust.remove(deadPlayer);
+                            beliefs.remove(deadPlayer);
 
-                                System.out.println(
-                                        getLocalName() + " removed dead player from trust/beliefs: " + deadPlayer + " bc is dead."
-                                );
+                            System.out.println(
+                                    getLocalName() + " removed dead player from trust/beliefs: " + deadPlayer + " bc is dead."
+                            );
 
-                            } catch (Exception e) {
-                                System.err.println(
-                                        getLocalName() + " failed to parse death message: " + content
-                                );
-                            }
+                        } catch (Exception e) {
+                            System.err.println(
+                                    getLocalName() + " failed to parse death message: " + content
+                            );
                         }
                     }
-
-                } else {
-                    block();
                 }
 
+            } else {
+                block();
             }
-        });
+        }
     }
 
     private void respondToRoleQuery(ACLMessage msg) {
@@ -151,27 +150,7 @@ public abstract class AbstractPlayerAgent extends Agent {
         }
     }
 
-    protected void processMessage(MessageType messageType, String content, String sender) {
-        switch (messageType) {
-            case ACCUSATION:
-                handleAccusation(content, sender);
-                break;
-            case TRUST:
-                handleTrust(content, sender);
-                break;
-            case ROLE_CLAIM:
-                handleRoleClaim(content, sender);
-                break;
-            case VOTE:
-                handleVote(content, sender);
-                break;
-            case SYSTEM:
-                handleSystem(content, sender);
-                break;
-            default:
-                break;
-        }
-    }
+    protected abstract void processMessage(MessageType messageType, String content, String sender);
     protected abstract void handleAccusation(String content, String sender); // Processar acusação
     protected abstract void handleRoleClaim(String content, String sender); // Processar revelação de papel
     protected abstract void handleVote(String content, String sender);      // Processar voto
