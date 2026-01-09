@@ -319,7 +319,6 @@ public class GameMasterAgent extends Agent {
 
         if (!deadPlayers.isEmpty()) {
             for (String player : deadPlayers) {
-                playerRoles.remove(player);
                 ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
                 msg.addReceiver(new AID(player, AID.ISLOCALNAME));
                 msg.setContent("You are dead.");
@@ -331,6 +330,7 @@ public class GameMasterAgent extends Agent {
                     msg.setConversationId(MessageType.KILL_NOTIFICATION.toString()); // se não for, notifica apenas a morte
 
                 send(msg);
+                playerRoles.remove(player);
                 broadcastSystem("The Player: " + player + " is Dead.", MessageType.SYSTEM);
             }
             deadPlayers.clear();
