@@ -52,19 +52,15 @@ public abstract class AbstractPlayerAgent extends Agent {
         addBehaviour(new CyclicBehaviour() {
             @Override
             public void action() {
-                System.out.println("1111");
                 ACLMessage msg = myAgent.receive();
                 if (msg == null) {
                     block();
                     return;
                 }
-                System.out.println("222");
 
                 MessageType type = null;
                 try {
-                    System.out.println("AAAA");
                     type = MessageType.valueOf(msg.getConversationId());
-                    System.out.println("BBBB");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -77,7 +73,7 @@ public abstract class AbstractPlayerAgent extends Agent {
     }
 
     private void respondToRoleQuery(String sender) {
-        System.out.println( getLocalName() + " respondendo role query: " + myRole.name());
+        System.out.println(getLocalName() + " respondendo role query: " + myRole.name());
         ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
         reply.addReceiver(new AID(sender, AID.ISLOCALNAME));
         reply.setPerformative(ACLMessage.INFORM);
@@ -122,7 +118,6 @@ public abstract class AbstractPlayerAgent extends Agent {
 
 
     protected void processMessage(MessageType messageType, String content, String sender) { //temporario para n dar erro
-        System.out.println(messageType);
         switch (messageType) {
             case ACCUSATION:
                 handleAccusation(content, sender);
@@ -155,10 +150,15 @@ public abstract class AbstractPlayerAgent extends Agent {
                 break;
         }
     }
+
     protected abstract void handleAccusation(String content, String sender); // Processar acusação
+
     protected abstract void handleRoleClaim(String content, String sender); // Processar revelação de papel
+
     protected abstract void handleVote(String content, String sender);      // Processar voto
+
     protected abstract void handleSystem(String content, String sender);    // Processar mensagem do sistema
+
     protected abstract void handleTrust(String content, String sender);     // Processar confiança
 
     protected abstract void decideAction();

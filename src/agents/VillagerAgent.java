@@ -14,29 +14,6 @@ public class VillagerAgent extends AbstractPlayerAgent {
     }
 
 
-
-    protected void processMessage(MessageType messageType, String content, String sender) { //temporario para n dar erro
-        switch (messageType) {
-            case ACCUSATION:
-                handleAccusation(content, sender);
-                break;
-            case TRUST:
-                handleTrust(content, sender);
-                break;
-            case ROLE_CLAIM:
-                handleRoleClaim(content, sender);
-                break;
-            case VOTE:
-                handleVote(content, sender);
-                break;
-            case SYSTEM:
-                handleSystem(content, sender);
-                break;
-            default:
-                break;
-        }
-    }
-
     protected void handleAccusation(String content, String sender) {
         content = content.trim();
         String[] parts = content.split(" ", 2);
@@ -48,14 +25,13 @@ public class VillagerAgent extends AbstractPlayerAgent {
         double senderTrust = super.trust.get(sender);
         double accusedTrust = super.trust.get(accusedAgent);
 
-        if (senderTrust > 0.5 && accusedTrust >= 0.5) { 
+        if (senderTrust > 0.5 && accusedTrust >= 0.5) {
             super.updateTrust(accusedAgent, -0.1);//se o acusador é confiável e o acusado também
-        } else if( senderTrust > 0.5 ) { 
+        } else if (senderTrust > 0.5) {
             super.updateTrust(accusedAgent, -0.2);//se o acusador é confiável e o acusado não é
-        } else if( accusedTrust >= 0.5 ) {                                                        
+        } else if (accusedTrust >= 0.5) {
             super.updateTrust(accusedAgent, -0.2);//se o acusador não é confiável e o acusado é
-        }
-        else {
+        } else {
             super.updateTrust(accusedAgent, -0.1);//se nenhum dos dois é confiável
         }
     }
@@ -70,14 +46,13 @@ public class VillagerAgent extends AbstractPlayerAgent {
         String reason = parts[1]; // por enquanto n tem uso
         double senderTrust = super.trust.get(sender);
         double trustedTrust = super.trust.get(trustedAgent);
-        if (senderTrust > 0.5 && trustedTrust <= 0.5) { 
+        if (senderTrust > 0.5 && trustedTrust <= 0.5) {
             super.updateTrust(trustedAgent, 0.1);//se o confiador é confiável e o confiado também
-        } else if( senderTrust > 0.5 ) { 
+        } else if (senderTrust > 0.5) {
             super.updateTrust(trustedAgent, 0.2);//se o confiador é confiável e o confiado não é
-        } else if( trustedTrust <= 0.5 ) {                                                        
+        } else if (trustedTrust <= 0.5) {
             super.updateTrust(trustedAgent, 0.2);//se o confiador não é confiável e o confiado é
-        }
-        else {
+        } else {
             super.updateTrust(trustedAgent, 0.1);//se nenhum dos dois é confiável
         }
     }
