@@ -1,5 +1,6 @@
 package agents;
 
+import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import model.MessageType;
 
@@ -9,29 +10,19 @@ public class SeerAgent extends VillagerAgent {
     protected void setup() {
         super.setup();
         this.myRole = model.Role.SEER;
-        addBehaviour(new jade.core.behaviours.CyclicBehaviour(this) {
-            @Override
-            public void action() {
-                jade.lang.acl.ACLMessage msg = myAgent.receive();
-                if (msg != null) {
-                    try {
-                        model.MessageType messageType = model.MessageType.valueOf(msg.getConversationId());
-                        if (messageType == model.MessageType.SEER_REVEAL) {
-                            handleSeer();
-                        } else if (messageType == model.MessageType.SEER_RECEIVE) {
-                            handleSeerReceive(msg.getContent());
-                        } else {}
-                    } catch (IllegalArgumentException e) {
-                        // ConversationId não corresponde a MessageType -> ignorar
-                    }
-                } else {
-                    block();
-                }
-            }
-        });
+
     }
 
-    private void handleSeer(){
+    protected void processMessage(MessageType messageType, String content, String sender) { //temporario para n dar erro
+        super.processMessage(messageType, content, sender);
+        if (messageType == MessageType.SEER_REVEAL) {
+            handleSeer(sender);
+        } else if (messageType == MessageType.SEER_RECEIVE) {
+            handleSeerReceive(content);
+        }
+    }
+
+    private void handleSeer(String sender){
         String target = null;
         double minTrust = Double.POSITIVE_INFINITY;
         for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
@@ -46,8 +37,8 @@ public class SeerAgent extends VillagerAgent {
         if (target != null) {
             ACLMessage reveal = new ACLMessage(ACLMessage.INFORM);
             reveal.setConversationId(MessageType.SEER_REVEAL.name());
-            reveal.setContent(target);
-            reveal.addReceiver(new jade.core.AID("GameMaster", jade.core.AID.ISLOCALNAME));
+            reveal.setContent("I see you, but u are distracted.");
+            reveal.addReceiver(new AID(target, AID.ISLOCALNAME)); // ao inves de ver o GameMaster, ve o agente em questao diretamente
             send(reveal);
         }
     }
@@ -61,6 +52,8 @@ public class SeerAgent extends VillagerAgent {
         if (parts.length < 2) return;
         String agent = parts[0];
         String role = parts[1].trim().toUpperCase();
+
+        System.out.println(role);
 
         if (role.equals("WEREWOLF")) {
             super.updateTrust(agent, 0.0);

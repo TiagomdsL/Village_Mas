@@ -13,7 +13,6 @@ public class VillagerAgent extends AbstractPlayerAgent {
         this.myRole = model.Role.VILLAGER;
     }
 
-
     protected void handleAccusation(String content, String sender) {
         content = content.trim();
         String[] parts = content.split(" ", 2);

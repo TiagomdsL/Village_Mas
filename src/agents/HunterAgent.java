@@ -1,5 +1,6 @@
 package agents;
 
+import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import model.MessageType;
@@ -10,29 +11,17 @@ public class HunterAgent extends VillagerAgent {
     protected void setup() {
         super.setup();
         this.myRole = model.Role.HUNTER;
-        addBehaviour(new CyclicBehaviour(this) {
-            @Override
-            public void action() {
-                ACLMessage msg = myAgent.receive();
-                if (msg != null) {
-                    try {
-                        MessageType messageType = MessageType.valueOf(msg.getConversationId());
-                        if (messageType == MessageType.HUNTER_KILL) {
-
-                            System.out.println("FFFFFFFFFFFF");
-                            handleHunter();
-                        } else {}
-                    } catch (IllegalArgumentException e) {
-                        // ConversationId não corresponde a MessageType -> ignorar
-                    }
-                } else {
-                    block();
-                }
-            }
-        });
     }
 
-    private void handleHunter(){
+    protected void processMessage(MessageType messageType, String content, String sender) { //temporario para n dar erro
+        super.processMessage(messageType, content, sender);
+        if (messageType == MessageType.HUNTER_KILL) {
+            System.out.println("9999999999");
+            handleHunter(sender);
+        }
+    }
+
+    private void handleHunter(String sender) {
         String target = null;
         double minTrust = Double.POSITIVE_INFINITY;
         for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
@@ -48,7 +37,7 @@ public class HunterAgent extends VillagerAgent {
             ACLMessage kill = new ACLMessage(ACLMessage.INFORM);
             kill.setConversationId(MessageType.HUNTER_KILL.name());
             kill.setContent(target);
-            kill.addReceiver(new jade.core.AID("GameMaster", jade.core.AID.ISLOCALNAME));
+            kill.addReceiver(new AID(sender, AID.ISLOCALNAME));
             send(kill);
         }
     }

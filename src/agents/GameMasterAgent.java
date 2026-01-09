@@ -22,8 +22,6 @@ import java.util.*;
  * - faz logging
  */
 public class GameMasterAgent extends Agent {
-
-    private GamePhase phase = GamePhase.NIGHT;
     private List<String>
             deadPlayers = new ArrayList<>(),
             protectedPlayers = new ArrayList<>();
@@ -50,29 +48,27 @@ public class GameMasterAgent extends Agent {
             e.printStackTrace();
         }
 
-        // Buscar agentes "player" registrados no DF
-        //playerRoles = queryRolesFromDF(5000);
         addBehaviour(new GamePhaseBehaviour());
     }
 
     private class GamePhaseBehaviour extends FSMBehaviour {
-        //        private static final String
-//                SETUP_PLAYERS = "SETUP_PLAYERS",
         public GamePhaseBehaviour() {
             registerFirstState(new SetupPlayersBehaviour(), GamePhase.SETUP.toString());
             registerState(new VotePhaseBehaviour(myAgent, 1), GamePhase.VOTING.toString());
-
+//            registerState(new VotePhaseBehaviour(myAgent, 1), GamePhase.NIGHT.toString());
+            registerState(new NightPhaseBehaviour(myAgent, 1), GamePhase.NIGHT.toString());
             registerLastState(new EndedBehaviour(), GamePhase.ENDED.toString());
 
-
             registerTransition(GamePhase.SETUP.toString(), GamePhase.VOTING.toString(), 0);
+
+            registerTransition(GamePhase.VOTING.toString(), GamePhase.NIGHT.toString(), 0);
             registerTransition(GamePhase.VOTING.toString(), GamePhase.ENDED.toString(), 1);
 
         }
 
-
     }
 
+    // Busca os players e seus roles no DF
     private class SetupPlayersBehaviour extends OneShotBehaviour {
         @Override
         public void action() {
@@ -81,7 +77,6 @@ public class GameMasterAgent extends Agent {
 
         @Override
         public int onEnd() {
-//            System.out.println(playerRoles);
             broadcastSystem("Init game", MessageType.SYSTEM);
             broadcastAlivePlayers();
             return 0;
@@ -89,7 +84,6 @@ public class GameMasterAgent extends Agent {
     }
 
     private class VotePhaseBehaviour extends TickerBehaviour {
-
         private int ticks = 0;
 
         public VotePhaseBehaviour(Agent a, long period) {
@@ -105,7 +99,6 @@ public class GameMasterAgent extends Agent {
         @Override
         public void onTick() {
             // TODO votação, onde recebe os votos via ACL, e verifica um treshold para matar alguem
-
             ticks++;
             if (ticks >= 2) {
                 stop();
@@ -114,29 +107,69 @@ public class GameMasterAgent extends Agent {
 
         @Override
         public int onEnd() {
-            killPlayer();
-
-            //broadcastAlivePlayers();
+            killPlayers();
             System.out.println("Entrou");
             return isEnded();
         }
     }
 
     private class NightPhaseBehaviour extends TickerBehaviour {
+        private int ticks = 0;
+
         public NightPhaseBehaviour(Agent a, long period) {
             super(a, period);
         }
 
+        // manda msg as roles especiais que estes conseguem agir a noite (no caso hunter, doctor, werewolf e seer)
         @Override
         public void onStart() {
             super.onStart();
             broadcastSystem("Night phase started.", MessageType.SYSTEM);
-
+            for (String p : playerRoles.keySet()) {
+                Role r = playerRoles.get(p);
+                if (r == Role.WEREWOLF) {
+                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                    msg.addReceiver(new AID(p, AID.ISLOCALNAME));
+                    msg.setContent("It's night. Choose someone to kill.");
+                    msg.setConversationId(MessageType.WEREWOLF_ATTACK.toString());
+                    send(msg);
+                } else if (r == Role.DOCTOR) {
+                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                    msg.addReceiver(new AID(p, AID.ISLOCALNAME));
+                    msg.setContent("It's night. Choose someone to protect.");
+                    msg.setConversationId(MessageType.DOCTOR_PROTECT.toString());
+                    send(msg);
+                } else if (r == Role.HUNTER) {
+                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                    msg.addReceiver(new AID(p, AID.ISLOCALNAME));
+                    msg.setContent("It's night. You can choose someone to kill if you die.");
+                    msg.setConversationId(MessageType.HUNTER_KILL.toString());
+                    send(msg);
+                } else if (r == Role.SEER) {
+                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                    msg.addReceiver(new AID(p, AID.ISLOCALNAME));
+                    msg.setContent(".");
+                    msg.setConversationId(MessageType.SEER_REVEAL.toString());
+                    send(msg);
+                }
+            }
         }
 
         @Override
         protected void onTick() {
+            ticks++;
+            // TODO: receber mensagens de quem foi atacado, protegido e visto
 
+            if (ticks <= 4) {
+                ACLMessage msg = blockingReceive();
+                if (msg != null) {
+                    String sender = msg.getSender().getLocalName();
+                    String content = msg.getContent();
+                    String convId = msg.getConversationId();
+            }
+            else{
+                stop();
+            }
         }
 
     }
@@ -144,7 +177,13 @@ public class GameMasterAgent extends Agent {
     private class EndedBehaviour extends OneShotBehaviour {
         @Override
         public void action() {
-            broadcastSystem("Game ended.", MessageType.SYSTEM);
+            for (Role role : playerRoles.values()) {
+                if (role == Role.WEREWOLF) {
+                    broadcastSystem("Game ended, vitoria dos lobisomens.", MessageType.SYSTEM);
+                    myAgent.doDelete();
+                }
+            }
+            broadcastSystem("Game ended, vitoria dos aldeões.", MessageType.SYSTEM);
             myAgent.doDelete();
         }
     }
@@ -229,7 +268,7 @@ public class GameMasterAgent extends Agent {
     }
 
 
-    private void killPlayer() {
+    private void killPlayers() {
         if (!protectedPlayers.isEmpty()) {
             for (String p : protectedPlayers) {
                 deadPlayers.remove(p);
@@ -265,7 +304,7 @@ public class GameMasterAgent extends Agent {
             }
         }
 
-        return (werewolves == 0 || villagers == 0) ? 1 : 0;
+        return (werewolves == 0 || villagers <= werewolves) ? 1 : 0;
     }
 
 }

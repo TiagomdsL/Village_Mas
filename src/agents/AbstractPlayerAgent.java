@@ -72,7 +72,7 @@ public abstract class AbstractPlayerAgent extends Agent {
         });
     }
 
-    private void respondToRoleQuery(String sender) {
+    protected void respondToRoleQuery(String sender) {
         System.out.println(getLocalName() + " respondendo role query: " + myRole.name());
         ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
         reply.addReceiver(new AID(sender, AID.ISLOCALNAME));
@@ -98,14 +98,11 @@ public abstract class AbstractPlayerAgent extends Agent {
     }
 
     protected void checkAlivePlayers(String content) {
-
-
         if (!content.startsWith("Players vivos:")) {
             return;
         }
 
         String playersStr = content.replace("Players vivos:", "").trim();
-
 
         if (!playersStr.isEmpty()) {
             String[] players = playersStr.split("\\s*,\\s*");
@@ -141,14 +138,22 @@ public abstract class AbstractPlayerAgent extends Agent {
             case ALIVE_PLAYERS:
                 checkAlivePlayers(content);
                 break;
-
             case SYSTEM:
-                handleSystem(content, sender);
+                handleSystem(content);
+                break;
+            case SEER_REVEAL:
+                detectedBySeer(sender);
                 break;
             default:
-                System.out.println(messageType);
                 break;
         }
+    }
+
+    private void detectedBySeer(String sender) {
+        ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
+        reply.addReceiver(new AID(sender, AID.ISLOCALNAME));
+        reply.setPerformative(ACLMessage.INFORM);
+        reply.setConversationId(MessageType.SEER_RECEIVE.name());
     }
 
     protected abstract void handleAccusation(String content, String sender); // Processar acusação
@@ -157,7 +162,30 @@ public abstract class AbstractPlayerAgent extends Agent {
 
     protected abstract void handleVote(String content, String sender);      // Processar voto
 
-    protected abstract void handleSystem(String content, String sender);    // Processar mensagem do sistema
+    protected void handleSystem(String content) {
+        if (content.contains("is Dead")) {
+            try {
+                String deadPlayer = content
+                        .replace("The Player:", "")
+                        .replace("is Dead.", "")
+                        .trim();
+
+                // Remover das estruturas internas
+                trust.remove(deadPlayer);
+                beliefs.remove(deadPlayer);
+
+                System.out.println(
+                        getLocalName() + " removed dead player from trust/beliefs: " + deadPlayer + " bc is dead."
+                );
+
+            } catch (Exception e) {
+                System.err.println(
+                        getLocalName() + " failed to parse death message: " + content
+                );
+            }
+        }
+
+    }    // Processar mensagem do sistema
 
     protected abstract void handleTrust(String content, String sender);     // Processar confiança
 

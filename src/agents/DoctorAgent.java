@@ -1,6 +1,6 @@
 package agents;
 
-import jade.core.behaviours.CyclicBehaviour;
+import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import model.MessageType;
 
@@ -12,28 +12,18 @@ public class DoctorAgent extends VillagerAgent {
     protected void setup() {
         super.setup();
         this.myRole = model.Role.DOCTOR;
-        addBehaviour(new CyclicBehaviour(this) {
-            @Override
-            public void action() {
-                ACLMessage msg = myAgent.receive();
-                if (msg != null) {
-                    try {
-                        MessageType messageType = MessageType.valueOf(msg.getConversationId());
-                        if (messageType == MessageType.DOCTOR_PROTECT) {
-                            handleDoctor();
-                        } else {}
-                    } catch (IllegalArgumentException e) {
-                        // ConversationId não corresponde a MessageType -> ignorar
-                    }
-                } else {
-                    block();
-                }
-            }
-        });
     }
 
-    
-    private void handleDoctor() {
+    protected void processMessage(MessageType messageType, String content, String sender) { //temporario para n dar erro
+        super.processMessage(messageType, content, sender);
+        if (messageType == MessageType.DOCTOR_PROTECT) {
+            handleDoctor(sender);
+        }
+    }
+
+
+    private void handleDoctor(String sender) {
+        System.out.println("AAAAAAAAAAAAAAAA");
         String protectedAgent;
         java.util.List<String> candidates = new java.util.ArrayList<>();
         for (Map.Entry<String, Double> entry : super.trust.entrySet()) {
@@ -67,7 +57,7 @@ public class DoctorAgent extends VillagerAgent {
             ACLMessage protectMsg = new ACLMessage(ACLMessage.INFORM);
             protectMsg.setConversationId(MessageType.DOCTOR_PROTECT.name());
             protectMsg.setContent(protectedAgent);
-            protectMsg.addReceiver(new jade.core.AID("GameMaster", jade.core.AID.ISLOCALNAME));
+            protectMsg.addReceiver(new jade.core.AID(sender, AID.ISLOCALNAME)); // para o GameMaster e ser escalavel
             send(protectMsg);
         }
     }
