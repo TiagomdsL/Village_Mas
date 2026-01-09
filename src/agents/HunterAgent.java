@@ -16,7 +16,6 @@ public class HunterAgent extends VillagerAgent {
     protected void processMessage(MessageType messageType, String content, String sender) { //temporario para n dar erro
         super.processMessage(messageType, content, sender);
         if (messageType == MessageType.HUNTER_KILL) {
-            System.out.println("9999999999");
             handleHunter(sender);
             doDelete();
         }

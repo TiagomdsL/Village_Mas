@@ -109,7 +109,7 @@ public abstract class AbstractPlayerAgent extends Agent {
             initBeliefs(players);
         }
 
-        System.out.println(getLocalName() + "Alive players updated: " + trust);
+//        System.out.println(getLocalName() + "Alive players updated: " + trust);
 
     }
 
@@ -176,14 +176,10 @@ public abstract class AbstractPlayerAgent extends Agent {
                 trust.remove(deadPlayer);
                 beliefs.remove(deadPlayer);
 
-                System.out.println(
-                        getLocalName() + " removed dead player from trust/beliefs: " + deadPlayer + " bc is dead."
-                );
+//                System.out.println(getLocalName() + " removed dead player from trust/beliefs: " + deadPlayer + " bc is dead.");
 
             } catch (Exception e) {
-                System.err.println(
-                        getLocalName() + " failed to parse death message: " + content
-                );
+                System.err.println(getLocalName() + " failed to parse death message: " + content);
             }
         }
 

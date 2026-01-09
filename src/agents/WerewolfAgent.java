@@ -3,10 +3,12 @@ package agents;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import model.MessageType;
+
 import java.util.List;
 
 public class WerewolfAgent extends VillagerAgent {
     private List<String> wolves;
+
     @Override
     protected void setup() {
         super.setup();
@@ -18,22 +20,19 @@ public class WerewolfAgent extends VillagerAgent {
         super.processMessage(messageType, content, sender);
         if (messageType == MessageType.WEREWOLF_ATTACK) {
             handleWerewolfAttack(sender);
-        }
-        else if (messageType == MessageType.WEREWOLF_QUESTION) {
+        } else if (messageType == MessageType.WEREWOLF_QUESTION) {
             handleWerewolfQuestion(sender);
-        }
-        else if (messageType == MessageType.WEREWOLF_ANSWER) {
+        } else if (messageType == MessageType.WEREWOLF_ANSWER) {
             // Recebeu resposta de outro lobo sobre quem atacar
             handleWerewolfAnswer(content);
-        }
-        else if (messageType == MessageType.WEREWOLF_PLAYERS) {
+        } else if (messageType == MessageType.WEREWOLF_PLAYERS) {
             // Recebe a lista de lobos
             this.wolves = List.of(content.split(","));
         }
     }
 
     //Pergunta aos outros lobos quem atacar
-    private void werewolfQuestion() { 
+    private void werewolfQuestion() {
         ACLMessage question = new ACLMessage(ACLMessage.INFORM);
         question.setConversationId(MessageType.WEREWOLF_QUESTION.name());
         question.setContent("Quem devemos atacar?");
@@ -70,7 +69,7 @@ public class WerewolfAgent extends VillagerAgent {
     //Recebeu a resposta de outro lobo sobre quem atacar
     private void handleWerewolfAnswer(String content) {
         String target = content.trim();
-        super.updateTrust(target, 1.0); 
+        super.updateTrust(target, 1.0);
         System.out.println(getLocalName() + " recebeu sugestão de ataque para: " + target);
         handleWerewolfAttack("GameMaster");
     }
@@ -90,7 +89,7 @@ public class WerewolfAgent extends VillagerAgent {
         }
         double doIAskOthers = Math.random();
         double targetTrust = super.trust.get(target);
-        if (target != null && (doIAskOthers < 0.5|| targetTrust == 1.0)) {
+        if (target != null && (doIAskOthers < 0.5 || targetTrust == 1.0) && !wolves.contains(target)) {
             ACLMessage attack = new ACLMessage(ACLMessage.INFORM);
             attack.setConversationId(MessageType.WEREWOLF_ATTACK.name());
             attack.setContent(target);
