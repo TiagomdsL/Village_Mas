@@ -91,6 +91,7 @@ public class GameMasterAgent extends Agent {
     private class VotePhaseBehaviour extends TickerBehaviour {
 
         private int ticks = 0;
+
         public VotePhaseBehaviour(Agent a, long period) {
             super(a, period);
         }
@@ -103,7 +104,9 @@ public class GameMasterAgent extends Agent {
 
         @Override
         public void onTick() {
-            ticks ++;
+            // TODO votação, onde recebe os votos via ACL, e verifica um treshold para matar alguem
+
+            ticks++;
             if (ticks >= 2) {
                 stop();
             }
@@ -119,13 +122,30 @@ public class GameMasterAgent extends Agent {
         }
     }
 
+    private class NightPhaseBehaviour extends TickerBehaviour {
+        public NightPhaseBehaviour(Agent a, long period) {
+            super(a, period);
+        }
+
+        @Override
+        public void onStart() {
+            super.onStart();
+            broadcastSystem("Night phase started.", MessageType.SYSTEM);
+
+        }
+
+        @Override
+        protected void onTick() {
+
+        }
+
+    }
+
     private class EndedBehaviour extends OneShotBehaviour {
         @Override
         public void action() {
-
             broadcastSystem("Game ended.", MessageType.SYSTEM);
             myAgent.doDelete();
-
         }
     }
 
@@ -210,6 +230,12 @@ public class GameMasterAgent extends Agent {
 
 
     private void killPlayer() {
+        if (!protectedPlayers.isEmpty()) {
+            for (String p : protectedPlayers) {
+                deadPlayers.remove(p);
+            }
+            protectedPlayers.clear();
+        }
 
         if (!deadPlayers.isEmpty()) {
             for (String player : deadPlayers) {
@@ -221,7 +247,8 @@ public class GameMasterAgent extends Agent {
                 send(msg);
                 broadcastSystem("The Player: " + player + " is Dead.", MessageType.SYSTEM);
             }
-        } else{
+            deadPlayers.clear();
+        } else {
             broadcastSystem("No one died this round.", MessageType.SYSTEM);
         }
 
