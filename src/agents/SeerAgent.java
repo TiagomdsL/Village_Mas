@@ -45,7 +45,6 @@ public class SeerAgent extends VillagerAgent {
 
     // altera o trust com base no content recebido ("AgentX ROLE")
     private void handleSeerReceive(String content, String sender) {
-        System.out.println("AAAAAAAAA");
         if (content == null) return;
         content = content.trim();
         System.out.println(content);

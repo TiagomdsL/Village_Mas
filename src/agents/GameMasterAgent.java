@@ -58,8 +58,8 @@ public class GameMasterAgent extends Agent {
     private class GamePhaseBehaviour extends FSMBehaviour {
         public GamePhaseBehaviour() {
             registerFirstState(new SetupPlayersBehaviour(), GamePhase.SETUP.toString());
-            registerState(new VotePhaseBehaviour(myAgent, 1), GamePhase.VOTING.toString());
-            registerState(new NightPhaseBehaviour(myAgent, 1), GamePhase.NIGHT.toString());
+            registerState(new VotePhaseBehaviour(myAgent, 1000), GamePhase.VOTING.toString());
+            registerState(new NightPhaseBehaviour(myAgent, 1000), GamePhase.NIGHT.toString());
             registerLastState(new EndedBehaviour(), GamePhase.ENDED.toString());
 
             registerTransition(GamePhase.SETUP.toString(), GamePhase.VOTING.toString(), 0);
@@ -84,6 +84,7 @@ public class GameMasterAgent extends Agent {
         @Override
         public int onEnd() {
             broadcastSystem("Init game", MessageType.SYSTEM);
+            broadcastWerewolvesPlayers();
             broadcastAlivePlayers();
             return 0;
         }
@@ -148,12 +149,6 @@ public class GameMasterAgent extends Agent {
                     msg.setContent("It's night. Choose someone to protect.");
                     msg.setConversationId(MessageType.DOCTOR_PROTECT.toString());
                     send(msg);
-                } else if (r == Role.HUNTER) {
-                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-                    msg.addReceiver(new AID(p, AID.ISLOCALNAME));
-                    msg.setContent("It's night. You can choose someone to kill if you die.");
-                    msg.setConversationId(MessageType.HUNTER_KILL.toString());
-                    send(msg);
                 } else if (r == Role.SEER) {
                     ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
                     msg.addReceiver(new AID(p, AID.ISLOCALNAME));
@@ -167,17 +162,15 @@ public class GameMasterAgent extends Agent {
         @Override
         protected void onTick() {
             ticks++;
-            // TODO: receber mensagens de quem foi atacado, protegido e visto
 
-            if (ticks <= 4) {
-                ACLMessage msg = blockingReceive();
-                if (msg != null) {
-                    String sender = msg.getSender().getLocalName();
-                    String content = msg.getContent();
-                    String convId = msg.getConversationId();
-                    mensage_type(convId, sender, content);
-                }
-            } else {
+            ACLMessage msg = receive(); //blockingReceive();
+            if (msg != null) {
+                String sender = msg.getSender().getLocalName();
+                String content = msg.getContent();
+                String convId = msg.getConversationId();
+                mensage_type(convId, sender, content);
+            }
+            if (ticks >= 5) {
                 stop();
             }
         }
@@ -217,6 +210,7 @@ public class GameMasterAgent extends Agent {
                 if (role == Role.WEREWOLF) {
                     broadcastSystem("Game ended, vitoria dos lobisomens.", MessageType.SYSTEM);
                     myAgent.doDelete();
+                    return;
                 }
             }
             broadcastSystem("Game ended, vitoria dos aldeões.", MessageType.SYSTEM);
@@ -260,7 +254,6 @@ public class GameMasterAgent extends Agent {
                     MessageTemplate.MatchPerformative(ACLMessage.INFORM),
                     MessageTemplate.MatchConversationId(MessageType.ROLE_QUERY.toString()));
 
-            String[] players = new String[result.length];
 
             while (System.currentTimeMillis() < deadline) {
                 long wait = deadline - System.currentTimeMillis();
@@ -273,7 +266,6 @@ public class GameMasterAgent extends Agent {
                     try {
                         Role r = Role.valueOf(content.substring(5));
                         playerRoles.put(sender, r);
-                        players[playerRoles.size() - 1] = sender;
                     } catch (IllegalArgumentException ignored) {
                         /* resposta inválida */
                     }
@@ -320,9 +312,10 @@ public class GameMasterAgent extends Agent {
         if (!protectedPlayers.isEmpty()) {
             for (String p : protectedPlayers) {
                 deadPlayers.remove(p);
+                System.out.println("Foi protegido um player");
             }
-            protectedPlayers.clear();
         }
+        protectedPlayers.clear();
 
         if (!deadPlayers.isEmpty()) {
             for (String player : deadPlayers) {
@@ -330,7 +323,13 @@ public class GameMasterAgent extends Agent {
                 ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
                 msg.addReceiver(new AID(player, AID.ISLOCALNAME));
                 msg.setContent("You are dead.");
-                msg.setConversationId(MessageType.KILL_NOTIFICATION.toString());
+
+                // se for um hunter, este será notificado para matar alguém
+                if (playerRoles.get(player) == Role.HUNTER)
+                    msg.setConversationId(MessageType.HUNTER_KILL.toString());
+                else
+                    msg.setConversationId(MessageType.KILL_NOTIFICATION.toString()); // se não for, notifica apenas a morte
+
                 send(msg);
                 broadcastSystem("The Player: " + player + " is Dead.", MessageType.SYSTEM);
             }
@@ -360,6 +359,8 @@ public class GameMasterAgent extends Agent {
             toDiePlayers.put(content, toDiePlayers.getOrDefault(content, 0) + 1); // lista da votação
         } else if (convId.equals(MessageType.DOCTOR_PROTECT.toString())) {
             protectedPlayers.add(content);
+        } else if (convId.equals(MessageType.HUNTER_KILL.toString())) {
+            deadPlayers.add(content);
         }
 
     }

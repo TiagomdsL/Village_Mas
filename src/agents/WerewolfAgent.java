@@ -20,12 +20,15 @@ public class WerewolfAgent extends VillagerAgent {
             handleWerewolfAttack(sender);
         }
         else if (messageType == MessageType.WEREWOLF_QUESTION) {
-            
             handleWerewolfQuestion(sender);
         }
         else if (messageType == MessageType.WEREWOLF_ANSWER) {
             // Recebeu resposta de outro lobo sobre quem atacar
             handleWerewolfAnswer(content);
+        }
+        else if (messageType == MessageType.WEREWOLF_PLAYERS) {
+            // Recebe a lista de lobos
+            this.wolves = List.of(content.split(","));
         }
     }
 
@@ -73,7 +76,7 @@ public class WerewolfAgent extends VillagerAgent {
     }
 
     //Decide quem atacar com 50/50 de perguntar aos outros lobos ou escolher o mais confiável, se o target é sugestão ele envia o ataque ao GameMaster
-    private void handleWerewolfAttack(String sender) { 
+    private void handleWerewolfAttack(String sender) {
         String target = null;
         double maxTrust = Double.NEGATIVE_INFINITY;
         for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {

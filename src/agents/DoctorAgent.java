@@ -23,7 +23,6 @@ public class DoctorAgent extends VillagerAgent {
 
 
     private void handleDoctor(String sender) {
-        System.out.println("AAAAAAAAAAAAAAAA");
         String protectedAgent;
         java.util.List<String> candidates = new java.util.ArrayList<>();
         for (Map.Entry<String, Double> entry : super.trust.entrySet()) {

@@ -53,7 +53,7 @@ public class GameLauncher {
         try {
             Runtime rt = Runtime.instance();
             Profile profile = new ProfileImpl();
-            profile.setParameter(Profile.GUI, "true");
+            profile.setParameter(Profile.GUI, "false");
 
             AgentContainer container = rt.createMainContainer(profile);
 

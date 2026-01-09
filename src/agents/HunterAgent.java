@@ -18,6 +18,7 @@ public class HunterAgent extends VillagerAgent {
         if (messageType == MessageType.HUNTER_KILL) {
             System.out.println("9999999999");
             handleHunter(sender);
+            doDelete();
         }
     }
 
