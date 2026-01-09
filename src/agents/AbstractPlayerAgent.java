@@ -1,5 +1,6 @@
 package agents;
 
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -48,59 +49,36 @@ public abstract class AbstractPlayerAgent extends Agent {
             e.printStackTrace();
         }
 
-        addBehaviour(new ListenerBehavior());
-    }
-
-    public class ListenerBehavior extends CyclicBehaviour {
-        @Override
-        public void action() {
-            ACLMessage msg = myAgent.receive();
-            if (msg != null) {
-                if( msg.getConversationId().equals(MessageType.ROLE_QUERY.toString()) ){
-                    respondToRoleQuery(msg);
-                }
-                else if( msg.getConversationId().equals(MessageType.KILL_NOTIFICATION.toString())){
-                    dyingPlayer(msg);
-                }
-                else if( msg.getConversationId().equals(MessageType.ALIVE_PLAYERS.toString())){
-                    checkAlivePlayers(msg);
-                }
-                else if ( msg.getConversationId().equals(MessageType.SYSTEM.toString()) ) {
-                    String content = msg.getContent();
-                    if( content.contains("is Dead")){
-                        try {
-                            String deadPlayer = content
-                                    .replace("The Player:", "")
-                                    .replace("is Dead.", "")
-                                    .trim();
-
-                            // Remover das estruturas internas
-                            trust.remove(deadPlayer);
-                            beliefs.remove(deadPlayer);
-
-                            System.out.println(
-                                    getLocalName() + " removed dead player from trust/beliefs: " + deadPlayer + " bc is dead."
-                            );
-
-                        } catch (Exception e) {
-                            System.err.println(
-                                    getLocalName() + " failed to parse death message: " + content
-                            );
-                        }
-                    }
+        addBehaviour(new CyclicBehaviour() {
+            @Override
+            public void action() {
+                ACLMessage msg = myAgent.receive();
+                if (msg == null) {
+                    block();
+                    return;
                 }
 
-            } else {
-                block();
+                MessageType type = null;
+                try {
+                    type = MessageType.valueOf(msg.getConversationId());
+                    System.out.println(type);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (type == null) return;
+                processMessage(type, msg.getContent(), msg.getSender().getLocalName());
+
+
             }
-        }
+        });
     }
 
-    private void respondToRoleQuery(ACLMessage msg) {
+    private void respondToRoleQuery(String sender) {
         System.out.println( getLocalName() + " respondendo role query: " + myRole.name());
-        ACLMessage reply = msg.createReply();
+        ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
+        reply.addReceiver(new AID(sender, AID.ISLOCALNAME));
         reply.setPerformative(ACLMessage.INFORM);
-        reply.setConversationId("role-query");
+        reply.setConversationId(MessageType.ROLE_QUERY.toString());
         reply.setContent("ROLE:" + myRole.name());
         send(reply);
     }
@@ -120,11 +98,8 @@ public abstract class AbstractPlayerAgent extends Agent {
         trust.put(player, Math.max(0, Math.min(1, trust.get(player) + delta)));
     }
 
-    protected void checkAlivePlayers(ACLMessage msg) {
-        String content = msg.getContent();
-        if (content == null) {
-            return;
-        }
+    protected void checkAlivePlayers(String content) {
+
 
         if (!content.startsWith("Players vivos:")) {
             return;
@@ -142,15 +117,40 @@ public abstract class AbstractPlayerAgent extends Agent {
 
     }
 
-    protected void dyingPlayer(ACLMessage msg) {
-        String content = msg.getContent();
-        if (content.contains("You are dead.")) {
-            System.out.println(getLocalName() + " received death notice.");
-            doDelete();
+
+    protected void processMessage(MessageType messageType, String content, String sender) { //temporario para n dar erro
+        switch (messageType) {
+            case ACCUSATION:
+                handleAccusation(content, sender);
+                break;
+            case TRUST:
+                handleTrust(content, sender);
+                break;
+            case ROLE_CLAIM:
+                handleRoleClaim(content, sender);
+                break;
+            case VOTE:
+                handleVote(content, sender);
+                break;
+            case ROLE_QUERY:
+                respondToRoleQuery(sender);
+                break;
+            case KILL_NOTIFICATION:
+                System.out.println(getLocalName() + " received death notice.");
+                doDelete();
+                break;
+            case ALIVE_PLAYERS:
+                checkAlivePlayers(content);
+                break;
+
+            case SYSTEM:
+                handleSystem(content, sender);
+                break;
+            default:
+                System.out.println(messageType);
+                break;
         }
     }
-
-    protected abstract void processMessage(MessageType messageType, String content, String sender);
     protected abstract void handleAccusation(String content, String sender); // Processar acusação
     protected abstract void handleRoleClaim(String content, String sender); // Processar revelação de papel
     protected abstract void handleVote(String content, String sender);      // Processar voto

@@ -163,7 +163,7 @@ public class GameMasterAgent extends Agent {
             long deadline = System.currentTimeMillis() + timeoutMs;
             MessageTemplate mt = MessageTemplate.and(
                     MessageTemplate.MatchPerformative(ACLMessage.INFORM),
-                    MessageTemplate.MatchConversationId("role-query"));
+                    MessageTemplate.MatchConversationId(MessageType.ROLE_QUERY.toString()));
 
             String[] players = new String[result.length];
 
