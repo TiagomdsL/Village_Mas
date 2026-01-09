@@ -1,10 +1,13 @@
 package model;
 
 public enum MessageType {
-    ACCUSATION,
-    TRUST,
-    SUSPICION,
-    ROLE_CLAIM,
-    VOTE,
-    SYSTEM
+    ACCUSATION, //o content será o nome do agente acusado espaço motivo ex "AgentX Lying about being Doctor"
+    TRUST, //o content será o nome do agente espaço o motivo ex "AgentX Reliable"
+    ROLE_CLAIM, //o content será o nome do papel espaço o motivo ex "Doctor Revealing role"
+    VOTE, //o content será o nome do agente votado ex "AgentX"
+    SYSTEM, //mensagens do sistema, como início e fim de rodada
+    DOCTOR_PROTECT, //o content será o nome do agente protegido quando enviado para o GameMaster ex "AgentX"
+    SEER_REVEAL, //o content será o nome do agente revelado quando enviado para o GameMaster ex "AgentX"
+    SEER_RECEIVE, //o content será o nome do agente espaço a sua role enviado para o Seer ex "AgentX WEREWOLF"
+    HUNTER_KILL //o content será o nome do agente morto quando enviado para o GameMaster ex "AgentX"
 }
