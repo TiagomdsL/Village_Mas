@@ -62,6 +62,8 @@ public class GameMasterAgent extends Agent {
             registerFirstState(new SetupPlayersBehaviour(), GamePhase.SETUP.toString());
             registerState(new VotePhaseBehaviour(myAgent, 1), GamePhase.VOTING.toString());
 
+            registerLastState(new EndedBehaviour(), GamePhase.ENDED.toString());
+
 
             registerTransition(GamePhase.SETUP.toString(), GamePhase.VOTING.toString(), 0);
             registerTransition(GamePhase.VOTING.toString(), GamePhase.ENDED.toString(), 1);
@@ -111,7 +113,7 @@ public class GameMasterAgent extends Agent {
         public int onEnd() {
             killPlayer();
 
-            broadcastAlivePlayers();
+            //broadcastAlivePlayers();
             System.out.println("Entrou");
             return isEnded();
         }
@@ -122,6 +124,7 @@ public class GameMasterAgent extends Agent {
         public void action() {
 
             broadcastSystem("Game ended.", MessageType.SYSTEM);
+            myAgent.doDelete();
 
         }
     }
@@ -150,7 +153,7 @@ public class GameMasterAgent extends Agent {
                 return Collections.emptyMap();
 
             ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
-            req.setConversationId("role-query");
+            req.setConversationId(MessageType.ROLE_QUERY.toString());
             req.setContent("ROLE_REQUEST");
             for (DFAgentDescription dfd : result) {
                 req.addReceiver(dfd.getName());

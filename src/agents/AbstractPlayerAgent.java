@@ -8,6 +8,7 @@ import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
+import model.MessageType;
 import model.Role;
 
 import java.util.ArrayList;
@@ -29,7 +30,6 @@ public abstract class AbstractPlayerAgent extends Agent {
     // Métrica de confiança [0,1]
     protected Map<String, Double> trust = new HashMap<>();
 
-    protected List<String> alivePlayers = new ArrayList<>();
 
     @Override
     protected void setup() {
@@ -50,31 +50,60 @@ public abstract class AbstractPlayerAgent extends Agent {
 
         // Recebe REQUEST de role-query e responde com INFORM "ROLE:<ROLE_NAME>"
         addBehaviour(new CyclicBehaviour(this) {
-            private final MessageTemplate mt = MessageTemplate.and(
-                    MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
-                    MessageTemplate.MatchConversationId("role-query"));
 
             @Override
             public void action() {
-                ACLMessage msg = myAgent.receive(mt);
+                ACLMessage msg = myAgent.receive();
                 if (msg != null) {
-                    String content = msg.getContent();
-                    if ("ROLE_REQUEST".equals(content)) {
-                        ACLMessage reply = msg.createReply();
-                        reply.setPerformative(ACLMessage.INFORM);
-                        reply.setConversationId("role-query");
-                        String roleStr = (myRole != null) ? myRole.name() : "UNASSIGNED";
-                        reply.setContent("ROLE:" + roleStr);
-                        myAgent.send(reply);
+                    if( msg.getConversationId().equals(MessageType.ROLE_QUERY.toString()) ){
+                        respondToRoleQuery(msg);
                     }
+                    else if( msg.getConversationId().equals(MessageType.KILL_NOTIFICATION.toString())){
+                        dyingPlayer(msg);
+                    }
+                    else if( msg.getConversationId().equals(MessageType.ALIVE_PLAYERS.toString())){
+                        checkAlivePlayers(msg);
+                    }
+                    else if ( msg.getConversationId().equals(MessageType.SYSTEM.toString()) ) {
+                        String content = msg.getContent();
+                        if( content.contains("is Dead")){
+                            try {
+                                String deadPlayer = content
+                                        .replace("The Player:", "")
+                                        .replace("is Dead.", "")
+                                        .trim();
+
+                                // Remover das estruturas internas
+                                trust.remove(deadPlayer);
+                                beliefs.remove(deadPlayer);
+
+                                System.out.println(
+                                        getLocalName() + " removed dead player from trust/beliefs: " + deadPlayer + " bc is dead."
+                                );
+
+                            } catch (Exception e) {
+                                System.err.println(
+                                        getLocalName() + " failed to parse death message: " + content
+                                );
+                            }
+                        }
+                    }
+
                 } else {
                     block();
                 }
-                dyingPlayer();
-                checkAlivePlayers();
 
             }
         });
+    }
+
+    private void respondToRoleQuery(ACLMessage msg) {
+        System.out.println( getLocalName() + " respondendo role query: " + myRole.name());
+        ACLMessage reply = msg.createReply();
+        reply.setPerformative(ACLMessage.INFORM);
+        reply.setConversationId("role-query");
+        reply.setContent("ROLE:" + myRole.name());
+        send(reply);
     }
 
     protected void initBeliefs(String[] players) {
@@ -92,14 +121,7 @@ public abstract class AbstractPlayerAgent extends Agent {
         trust.put(player, Math.max(0, Math.min(1, trust.get(player) + delta)));
     }
 
-    protected void checkAlivePlayers() {
-        MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
-
-        ACLMessage msg = receive(mt);
-        if (msg == null) {
-            return;
-        }
-
+    protected void checkAlivePlayers(ACLMessage msg) {
         String content = msg.getContent();
         if (content == null) {
             return;
@@ -111,25 +133,17 @@ public abstract class AbstractPlayerAgent extends Agent {
 
         String playersStr = content.replace("Players vivos:", "").trim();
 
-        alivePlayers.clear();
 
         if (!playersStr.isEmpty()) {
             String[] players = playersStr.split("\\s*,\\s*");
-            alivePlayers.addAll(List.of(players));
+            initBeliefs(players);
         }
 
-        System.out.println(getLocalName() + "Alive players updated: " + alivePlayers);
+        System.out.println(getLocalName() + "Alive players updated: " + trust);
 
     }
 
-    protected void dyingPlayer() {
-        MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
-
-        ACLMessage msg = receive(mt);
-        if (msg == null) {
-            return;
-        }
-
+    protected void dyingPlayer(ACLMessage msg) {
         String content = msg.getContent();
         if (content.contains("You are dead.")) {
             System.out.println(getLocalName() + " received death notice.");
@@ -137,6 +151,28 @@ public abstract class AbstractPlayerAgent extends Agent {
         }
     }
 
+    protected void processMessage(MessageType messageType, String content, String sender) {
+        switch (messageType) {
+            case ACCUSATION:
+                handleAccusation(content, sender);
+                break;
+            case TRUST:
+                handleTrust(content, sender);
+                break;
+            case ROLE_CLAIM:
+                handleRoleClaim(content, sender);
+                break;
+            case VOTE:
+                handleVote(content, sender);
+                break;
+            case SYSTEM:
+                handleSystem(content, sender);
+                break;
+            default:
+                break;
+        }
+    }
+    protected abstract void handleAccusation(String content, String sender); // Processar acusação
     protected abstract void handleRoleClaim(String content, String sender); // Processar revelação de papel
     protected abstract void handleVote(String content, String sender);      // Processar voto
     protected abstract void handleSystem(String content, String sender);    // Processar mensagem do sistema

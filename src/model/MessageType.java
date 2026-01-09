@@ -1,6 +1,7 @@
 package model;
 
 public enum MessageType {
+    ROLE_QUERY, //o content será pedido de role ex "Requesting role"
     ACCUSATION, //o content será o nome do agente acusado espaço motivo ex "AgentX Lying about being Doctor"
     TRUST, //o content será o nome do agente espaço o motivo ex "AgentX Reliable"
     ROLE_CLAIM, //o content será o nome do papel espaço o motivo ex "Doctor Revealing role"
