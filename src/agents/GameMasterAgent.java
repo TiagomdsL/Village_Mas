@@ -166,6 +166,7 @@ public class GameMasterAgent extends Agent {
                     String sender = msg.getSender().getLocalName();
                     String content = msg.getContent();
                     String convId = msg.getConversationId();
+                }
             }
             else{
                 stop();
