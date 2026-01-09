@@ -24,7 +24,11 @@ import java.util.*;
 public class GameMasterAgent extends Agent {
     private List<String>
             deadPlayers = new ArrayList<>(),
-            protectedPlayers = new ArrayList<>();
+            protectedPlayers = new ArrayList<>(),
+            werewolvesPlayers = new ArrayList<>();
+
+    // lista de players a morrer (votação dos werewolfes)
+    private Map<String, Integer> toDiePlayers = new HashMap<>();
 
     // map de roles obtidos por DF
     private Map<String, Role> playerRoles = new HashMap<>();
@@ -63,6 +67,9 @@ public class GameMasterAgent extends Agent {
 
             registerTransition(GamePhase.VOTING.toString(), GamePhase.NIGHT.toString(), 0);
             registerTransition(GamePhase.VOTING.toString(), GamePhase.ENDED.toString(), 1);
+//
+            registerTransition(GamePhase.NIGHT.toString(), GamePhase.VOTING.toString(), 0);
+            registerTransition(GamePhase.NIGHT.toString(), GamePhase.ENDED.toString(), 1);
 
         }
 
@@ -148,7 +155,7 @@ public class GameMasterAgent extends Agent {
                 } else if (r == Role.SEER) {
                     ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
                     msg.addReceiver(new AID(p, AID.ISLOCALNAME));
-                    msg.setContent(".");
+                    msg.setContent("revela");
                     msg.setConversationId(MessageType.SEER_REVEAL.toString());
                     send(msg);
                 }
@@ -166,13 +173,35 @@ public class GameMasterAgent extends Agent {
                     String sender = msg.getSender().getLocalName();
                     String content = msg.getContent();
                     String convId = msg.getConversationId();
+                    mensage_type(convId, sender, content);
                 }
-            }
-            else{
+            } else {
                 stop();
             }
         }
 
+        @Override
+        public int onEnd() {
+            if (!toDiePlayers.isEmpty()) {
+                String mostVotedPlayer = null;
+                int maxVotes = -1;
+
+                for (Map.Entry<String, Integer> entry : toDiePlayers.entrySet()) {
+                    if (entry.getValue() > maxVotes) {
+                        maxVotes = entry.getValue();
+                        mostVotedPlayer = entry.getKey();
+                    }
+                }
+
+                if (mostVotedPlayer != null) {
+                    deadPlayers.add(mostVotedPlayer);
+                }
+            }
+            toDiePlayers.clear();
+            killPlayers();
+
+            return isEnded();
+        }
     }
 
     private class EndedBehaviour extends OneShotBehaviour {
@@ -268,6 +297,18 @@ public class GameMasterAgent extends Agent {
         System.out.println(players);
     }
 
+    private void broadcastWerewolvesPlayers() {
+        for (String p : playerRoles.keySet()) {
+            Role r = playerRoles.get(p);
+            if (r == Role.WEREWOLF) {
+                werewolvesPlayers.add(p);
+            }
+        }
+        String werewolves = String.join(", ", werewolvesPlayers);
+        broadcastSystem("Werewolves players:" + werewolves, MessageType.WEREWOLF_PLAYERS);
+        System.out.println(werewolves);
+    }
+
 
     private void killPlayers() {
         if (!protectedPlayers.isEmpty()) {
@@ -306,6 +347,15 @@ public class GameMasterAgent extends Agent {
         }
 
         return (werewolves == 0 || villagers <= werewolves) ? 1 : 0;
+    }
+
+    private void mensage_type(String convId, String sender, String content) {
+        if (convId.equals(MessageType.WEREWOLF_ATTACK.toString())) {
+            toDiePlayers.put(content, toDiePlayers.getOrDefault(content, 0) + 1); // lista da votação
+        } else if (convId.equals(MessageType.DOCTOR_PROTECT.toString())) {
+            protectedPlayers.add(content);
+        }
+
     }
 
 }

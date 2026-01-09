@@ -18,7 +18,7 @@ public class SeerAgent extends VillagerAgent {
         if (messageType == MessageType.SEER_REVEAL) {
             handleSeer(sender);
         } else if (messageType == MessageType.SEER_RECEIVE) {
-            handleSeerReceive(content);
+            handleSeerReceive(content, sender);
         }
     }
 
@@ -44,21 +44,18 @@ public class SeerAgent extends VillagerAgent {
     }
 
     // altera o trust com base no content recebido ("AgentX ROLE")
-    private void handleSeerReceive(String content) {
+    private void handleSeerReceive(String content, String sender) {
+        System.out.println("AAAAAAAAA");
         if (content == null) return;
         content = content.trim();
+        System.out.println(content);
         if (content.isEmpty()) return;
-        String[] parts = content.split("\\s+", 2);
-        if (parts.length < 2) return;
-        String agent = parts[0];
-        String role = parts[1].trim().toUpperCase();
+        System.out.println("Ent a role deste é " + content);
 
-        System.out.println(role);
-
-        if (role.equals("WEREWOLF")) {
-            super.updateTrust(agent, 0.0);
+        if (content.equals("WEREWOLF")) {
+            super.updateTrust(sender, 0.0);
         } else {
-            super.updateTrust(agent, 1.0);
+            super.updateTrust(sender, 1.0);
         }
     }
 

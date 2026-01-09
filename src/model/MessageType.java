@@ -13,5 +13,6 @@ public enum MessageType {
     HUNTER_KILL, //o content será o nome do agente morto quando enviado para o GameMaster ex "AgentX"
     KILL_NOTIFICATION, //o content será o nome do agente morto quando enviado para os agentes ex "AgentX"
     ALIVE_PLAYERS, //o content será a lista de jogadores vivos separados por vírgula ex "AgentX,AgentY,AgentZ"
-    WEREWOLF_ATTACK //o content será o nome do agente escolhido para morrer ex "AgentX"
+    WEREWOLF_ATTACK, //o content será o nome do agente escolhido para morrer ex "AgentX"
+    WEREWOLF_PLAYERS //o content será a lista de lobisomens vivos separados por vírgula ex "AgentX,AgentY"
 }

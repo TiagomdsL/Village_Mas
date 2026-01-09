@@ -59,6 +59,7 @@ public class DoctorAgent extends VillagerAgent {
             protectMsg.setContent(protectedAgent);
             protectMsg.addReceiver(new jade.core.AID(sender, AID.ISLOCALNAME)); // para o GameMaster e ser escalavel
             send(protectMsg);
+            System.out.println("Doctor " + getLocalName() + " is protecting " + protectedAgent);
         }
     }
 }

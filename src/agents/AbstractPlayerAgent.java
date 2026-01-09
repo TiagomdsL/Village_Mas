@@ -154,6 +154,8 @@ public abstract class AbstractPlayerAgent extends Agent {
         reply.addReceiver(new AID(sender, AID.ISLOCALNAME));
         reply.setPerformative(ACLMessage.INFORM);
         reply.setConversationId(MessageType.SEER_RECEIVE.name());
+        reply.setContent(myRole.name());
+        send(reply);
     }
 
     protected abstract void handleAccusation(String content, String sender); // Processar acusação
