@@ -59,7 +59,6 @@ public class GameMasterAgent extends Agent {
         public GamePhaseBehaviour() {
             registerFirstState(new SetupPlayersBehaviour(), GamePhase.SETUP.toString());
             registerState(new VotePhaseBehaviour(myAgent, 1), GamePhase.VOTING.toString());
-//            registerState(new VotePhaseBehaviour(myAgent, 1), GamePhase.NIGHT.toString());
             registerState(new NightPhaseBehaviour(myAgent, 1), GamePhase.NIGHT.toString());
             registerLastState(new EndedBehaviour(), GamePhase.ENDED.toString());
 
@@ -100,6 +99,7 @@ public class GameMasterAgent extends Agent {
         @Override
         public void onStart() {
             super.onStart();
+            ticks = 0;
             broadcastSystem("Vote phase started.", MessageType.SYSTEM);
         }
 
@@ -115,7 +115,8 @@ public class GameMasterAgent extends Agent {
         @Override
         public int onEnd() {
             killPlayers();
-            System.out.println("Entrou");
+            GamePhaseBehaviour fsm = (GamePhaseBehaviour) getParent();
+            fsm.registerState(new NightPhaseBehaviour(myAgent, 1000), GamePhase.NIGHT.toString());
             return isEnded();
         }
     }
@@ -131,6 +132,7 @@ public class GameMasterAgent extends Agent {
         @Override
         public void onStart() {
             super.onStart();
+            ticks = 0;
             broadcastSystem("Night phase started.", MessageType.SYSTEM);
             for (String p : playerRoles.keySet()) {
                 Role r = playerRoles.get(p);
@@ -199,6 +201,10 @@ public class GameMasterAgent extends Agent {
             }
             toDiePlayers.clear();
             killPlayers();
+
+
+            GamePhaseBehaviour fsm = (GamePhaseBehaviour) getParent();
+            fsm.registerState(new VotePhaseBehaviour(myAgent, 1000), GamePhase.VOTING.toString());
 
             return isEnded();
         }
