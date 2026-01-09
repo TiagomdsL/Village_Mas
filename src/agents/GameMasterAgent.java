@@ -23,7 +23,7 @@ import java.util.*;
  */
 public class GameMasterAgent extends Agent {
     private List<String>
-            deadPlayers = new ArrayList<>(),
+            toKill = new ArrayList<>(),
             protectedPlayers = new ArrayList<>(),
             werewolvesPlayers = new ArrayList<>();
 
@@ -37,7 +37,7 @@ public class GameMasterAgent extends Agent {
     @Override
     protected void setup() {
 
-        deadPlayers.add("Player1"); // apenas para testes
+        toKill.add("Player1"); // apenas para testes
 
         // Registrar o GameMaster no DF para que players possam localizá-lo
         DFAgentDescription myDesc = new DFAgentDescription();
@@ -189,7 +189,7 @@ public class GameMasterAgent extends Agent {
                 }
 
                 if (mostVotedPlayer != null) {
-                    deadPlayers.add(mostVotedPlayer);
+                    toKill.add(mostVotedPlayer);
                 }
             }
             toDiePlayers.clear();
@@ -308,14 +308,18 @@ public class GameMasterAgent extends Agent {
     }
 
 
+    // verificação se houve players mortos
     private void killPlayers() {
         if (!protectedPlayers.isEmpty()) {
             for (String p : protectedPlayers) {
-                deadPlayers.remove(p);
+                toKill.remove(p);
                 System.out.println("Foi protegido um player");
             }
         }
         protectedPlayers.clear();
+
+        List<String> deadPlayers = new ArrayList<>(toKill); //auxiliar por causa do hunter
+        toKill.clear();
 
         if (!deadPlayers.isEmpty()) {
             for (String player : deadPlayers) {
@@ -338,8 +342,11 @@ public class GameMasterAgent extends Agent {
             broadcastSystem("No one died this round.", MessageType.SYSTEM);
         }
 
+        if (!toKill.isEmpty()) killPlayers(); // recursividade para tratar as mortes causadas pelo hunter
+
     }
 
+    // verificação da condição de fim de jogo
     private int isEnded() {
         int werewolves = 0, villagers = 0;
 
@@ -359,10 +366,9 @@ public class GameMasterAgent extends Agent {
             toDiePlayers.put(content, toDiePlayers.getOrDefault(content, 0) + 1); // lista da votação
         } else if (convId.equals(MessageType.DOCTOR_PROTECT.toString())) {
             protectedPlayers.add(content);
-        } else if (convId.equals(MessageType.HUNTER_KILL.toString())) {
-            deadPlayers.add(content);
+        } else if (convId.equals(MessageType.HUNTER_KILL.toString())) { // o hunter matou alguém, adicionar à lista de mortos
+            System.out.println("Adicionando jogador a lista de mortos pelo hunter: " + content);
+            toKill.add(content);
         }
-
     }
-
 }
