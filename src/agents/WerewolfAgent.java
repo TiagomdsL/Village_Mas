@@ -4,6 +4,8 @@ import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import model.MessageType;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class WerewolfAgent extends VillagerAgent {
@@ -29,7 +31,7 @@ public class WerewolfAgent extends VillagerAgent {
             handleWerewolfAnswer(content);
         } else if (messageType == MessageType.WEREWOLF_PLAYERS) {
             // Recebe a lista de werewolfs
-            this.wolves = List.of(content.split(","));
+            wereWolfList(content);
         }
     }
 
@@ -124,13 +126,11 @@ public class WerewolfAgent extends VillagerAgent {
         }
     }
 
-    @Override
-    protected void handleSystem(String content) {
-        super.handleSystem(content);
-        if (content.equals("Werewolves players")) {
+    protected void wereWolfList(String content) {
+        if (content.contains("Werewolves players:")) {
             String[] parts = content.split(":");
             String wolvesList = parts[1].trim();
-            this.wolves = List.of(wolvesList.split(","));
+            this.wolves = new ArrayList<>(Arrays.asList(wolvesList.split(",")));
         }
     }
 }

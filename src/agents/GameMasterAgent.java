@@ -290,7 +290,13 @@ public class GameMasterAgent extends Agent {
             }
         }
         String werewolves = String.join(", ", werewolvesPlayers);
-        broadcastSystem("Werewolves players:" + werewolves, MessageType.WEREWOLF_PLAYERS);
+        for (String p : werewolvesPlayers) {
+            ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+            msg.addReceiver(new AID(p, AID.ISLOCALNAME));
+            msg.setContent("Werewolves players:" + werewolves);
+            msg.setConversationId(MessageType.WEREWOLF_PLAYERS.toString());
+            send(msg);
+        }
         System.out.println(werewolves);
     }
 
