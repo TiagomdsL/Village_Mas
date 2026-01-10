@@ -15,6 +15,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
     }
 
     protected void handleAccusation(String content, String sender) {
+        Random random = new Random();
         content = content.trim();
         String[] parts = content.split(" ", 2);
         if (parts.length < 2) {
@@ -30,13 +31,17 @@ public class VillagerAgent extends AbstractPlayerAgent {
         } else if (senderTrust > 0.5) {
             super.updateTrust(accusedAgent, -0.2);//se o acusador é confiável e o acusado não é
         } else if (accusedTrust >= 0.5) {
-            super.updateTrust(accusedAgent, -0.2);//se o acusador não é confiável e o acusado é
+            super.updateTrust(sender, -0.2);//se o acusador não é confiável e o acusado é
         } else {
-            super.updateTrust(accusedAgent, -0.1);//se nenhum dos dois é confiável
+            double deceptionChance = random.nextDouble(-0.2, 0.1);
+            super.updateTrust(accusedAgent, deceptionChance); // se o acusador e o acusado não são confiáveis
+            deceptionChance = random.nextDouble(-0.2, 0.1);
+            super.updateTrust(sender, deceptionChance);
         }
     }
 
     protected void handleTrust(String content, String sender) {
+        Random random = new Random();
         content = content.trim();
         String[] parts = content.split(" ", 2);
         if (parts.length < 2) {
@@ -46,14 +51,13 @@ public class VillagerAgent extends AbstractPlayerAgent {
         String reason = parts[1]; // por enquanto n tem uso
         double senderTrust = super.trust.get(sender);
         double trustedTrust = super.trust.get(trustedAgent);
-        if (senderTrust > 0.5 && trustedTrust <= 0.5) {
-            super.updateTrust(trustedAgent, 0.1);//se o confiador é confiável e o confiado também
+        if (senderTrust > 0.5 && trustedTrust < 0.5) {
+            super.updateTrust(trustedAgent, 0.15);
         } else if (senderTrust > 0.5) {
-            super.updateTrust(trustedAgent, 0.2);//se o confiador é confiável e o confiado não é
-        } else if (trustedTrust <= 0.5) {
-            super.updateTrust(trustedAgent, 0.2);//se o confiador não é confiável e o confiado é
+            super.updateTrust(trustedAgent, 0.3);
         } else {
-            super.updateTrust(trustedAgent, 0.1);//se nenhum dos dois é confiável
+            double deceptionChance = random.nextDouble(-0.2, 0.1);
+            super.updateTrust(trustedAgent, deceptionChance);
         }
     }
 
