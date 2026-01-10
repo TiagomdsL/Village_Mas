@@ -14,9 +14,9 @@ public class Main {
         // Configuração padrão (demo)
         GameLauncher launcher = new GameLauncher()
                 .setNumPlayers(10)
-                .enableSeer(true)
-                .enableDoctor(true)
-                .enableHunter(true)
+                .setSeerRatio(0.1)
+                .setDoctorRatio(0.1)
+                .setHunterRatio(0.1)
                 .setMessageLimit(2)
                 .setMaxRounds(20)
                 .setSeed(42);

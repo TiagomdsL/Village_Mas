@@ -22,13 +22,13 @@ public class GameLauncher {
     /* ================= CONFIGURAÇÕES DO JOGO ================= */
 
     // Jogadores
-    private int numPlayers = 10;
-    private int numWerewolves = 2;
+    private int numPlayers = 50;
+    private double werewolvesRatio = 0.2 + (Math.random() * 2 - 1) * 0.05;
 
     // Roles especiais
-    private boolean enableSeer = true;
-    private boolean enableDoctor = true;
-    private boolean enableHunter = true;
+    private double seerRatio = 0.1 + (Math.random() * 2 - 1) * 0.03;
+    private double doctorRatio = 0.1 + (Math.random() * 2 - 1) * 0.03;
+    private double hunterRatio = 0.1 + (Math.random() * 2 - 1) * 0.03;
 
     // Comunicação
     private int maxPublicMessagesPerDay = 2; // ex: 1 para comunicação restrita
@@ -118,16 +118,22 @@ public class GameLauncher {
     private List<Role> buildRolePool(int playersCount) {
         List<Role> pool = new ArrayList<>();
 
-        // adicionar lobisomens
-        int wolves = Math.min(numWerewolves, playersCount);
+        // adicionar as roles que não sejam villagers em si
+        int wolves = (int) Math.floor(playersCount * werewolvesRatio);
+        int seers = (int) Math.floor(playersCount * seerRatio);
+        int doctors = (int) Math.floor(playersCount * doctorRatio);
+        int hunters = (int) Math.floor(playersCount * hunterRatio);
+
         for (int i = 0; i < wolves; i++)
             pool.add(Role.WEREWOLF);
 
-        if (enableSeer)
+        for (int i = 0; i < seers; i++)
             pool.add(Role.SEER);
-        if (enableDoctor)
+
+        for (int i = 0; i < doctors; i++)
             pool.add(Role.DOCTOR);
-        if (enableHunter)
+
+        for (int i = 0; i < hunters; i++)
             pool.add(Role.HUNTER);
 
         // preencher o resto com VILLAGER
@@ -160,10 +166,10 @@ public class GameLauncher {
      */
     private void printConfiguration() {
         System.out.println("Players: " + numPlayers);
-        System.out.println("Werewolves: " + numWerewolves);
-        System.out.println("Seer enabled: " + enableSeer);
-        System.out.println("Doctor enabled: " + enableDoctor);
-        System.out.println("Hunter enabled: " + enableHunter);
+        System.out.println("Werewolves: " + werewolvesRatio);
+        System.out.println("Seer enabled: " + seerRatio);
+        System.out.println("Doctor enabled: " + doctorRatio);
+        System.out.println("Hunter enabled: " + hunterRatio);
         System.out.println("Message limit/day: " + maxPublicMessagesPerDay);
         System.out.println("Max rounds: " + maxRounds);
         System.out.println("Random seed: " + randomSeed);
@@ -174,24 +180,25 @@ public class GameLauncher {
 
     public GameLauncher setNumPlayers(int n) {
         this.numPlayers = n;
-        this.numWerewolves = Math.max(1, n / 5); // ajustar número de lobisomens
+        this.werewolvesRatio = Math.max(1, n / 5); // ajustar número de lobisomens
         return this;
     }
 
-    public GameLauncher enableSeer(boolean v) {
-        this.enableSeer = v;
+    public GameLauncher setSeerRatio(double r) {
+        this.seerRatio = r + (Math.random() * 2 - 1) * 0.03;
         return this;
     }
 
-    public GameLauncher enableDoctor(boolean v) {
-        this.enableDoctor = v;
+    public GameLauncher setDoctorRatio(double r) {
+        this.doctorRatio = r + (Math.random() * 2 - 1) * 0.03;
         return this;
     }
 
-    public GameLauncher enableHunter(boolean v) {
-        this.enableHunter = v;
+    public GameLauncher setHunterRatio(double r) {
+        this.hunterRatio = r + (Math.random() * 2 - 1) * 0.03;
         return this;
     }
+
 
     public GameLauncher setMessageLimit(int limit) {
         this.maxPublicMessagesPerDay = limit;
