@@ -333,8 +333,8 @@ public class GameMasterAgent extends Agent {
                     msg.setConversationId(MessageType.KILL_NOTIFICATION.toString()); // se não for, notifica apenas a morte
 
                 send(msg);
+                broadcastSystem("The Player: " + player + " is Dead. " + playerRoles.get(player) , MessageType.SYSTEM);
                 playerRoles.remove(player);
-                broadcastSystem("The Player: " + player + " is Dead.", MessageType.SYSTEM);
             }
             deadPlayers.clear();
         } else {

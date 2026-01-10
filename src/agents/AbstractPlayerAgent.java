@@ -166,14 +166,25 @@ public abstract class AbstractPlayerAgent extends Agent {
     protected void handleSystem(String content) {
         if (content.contains("is Dead")) {
             try {
-                String deadPlayer = content
+                String[] deadPlayer = content
                         .replace("The Player:", "")
-                        .replace("is Dead.", "")
-                        .trim();
+                        .replace("is Dead", "")
+                        .split("\\.");
 
-                // Remover das estruturas internas
-                trust.remove(deadPlayer);
-                beliefs.remove(deadPlayer);
+                String deadPlayerStr = deadPlayer[0].trim();
+                String roleStr = deadPlayer[1].trim();
+
+                // remover o player morto das listas de confiança
+                trust.remove(deadPlayerStr);
+                beliefs.remove(deadPlayerStr);
+
+                if (!roleStr.equals("WEREWOLF")) {
+                    for (String p : trust.keySet()) {
+                        if (!p.equals(deadPlayerStr)) {
+                            updateTrust(p, -0.15); // diminui a confiança em outros jogadores, causando panico
+                        }
+                    }
+                }
 
 //                System.out.println(getLocalName() + " removed dead player from trust/beliefs: " + deadPlayer + " bc is dead.");
 
