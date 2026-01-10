@@ -15,6 +15,11 @@ import model.GamePhase;
 import model.MessageType;
 import model.Role;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -213,6 +218,8 @@ public class GameMasterAgent extends Agent {
         public void action() {
 
             System.out.println(gameState.toString(2));
+            saveGameStateToFile();
+
             for (Role role : playerRoles.values()) {
                 if (role == Role.WEREWOLF) {
                     broadcastSystem("Game ended, vitoria dos lobisomens.", MessageType.SYSTEM);
@@ -300,17 +307,6 @@ public class GameMasterAgent extends Agent {
 
     }
 
-    private void alivePlayersJson(String phase) {
-        JSONArray aliveArray = new JSONArray();
-        for (String p : playerRoles.keySet()) {
-            JSONObject playerObj = new JSONObject();
-            playerObj.put("name", p);
-            playerObj.put("role", playerRoles.get(p).toString());
-            aliveArray.put(playerObj);
-        }
-        logEvent(phase, "ALIVE_PLAYERS", aliveArray);
-    }
-
     private void broadcastWerewolvesPlayers() {
         for (String p : playerRoles.keySet()) {
             Role r = playerRoles.get(p);
@@ -333,6 +329,7 @@ public class GameMasterAgent extends Agent {
     private void killPlayers() {
         if (!protectedPlayers.isEmpty()) {
             for (String p : protectedPlayers) {
+                broadcastSystem("Player " + p + " was protected by the Doctor.", MessageType.SYSTEM);
                 toKill.remove(p);
                 System.out.println("Foi protegido um player");
             }
@@ -367,16 +364,6 @@ public class GameMasterAgent extends Agent {
 
     }
 
-    private void killPlayersJson(String phase) {
-        JSONArray deadArray = new JSONArray();
-        for (String p : toKill) {
-            JSONObject playerObj = new JSONObject();
-            playerObj.put("name", p);
-            playerObj.put("role", playerRoles.get(p).toString());
-            deadArray.put(playerObj);
-        }
-        logEvent(phase, "DEAD_PLAYERS", deadArray);
-    }
 
 
     // verificação da condição de fim de jogo
@@ -405,6 +392,28 @@ public class GameMasterAgent extends Agent {
         }
     }
 
+    private void killPlayersJson(String phase) {
+        JSONArray deadArray = new JSONArray();
+        for (String p : toKill) {
+            JSONObject playerObj = new JSONObject();
+            playerObj.put("name", p);
+            playerObj.put("role", playerRoles.get(p).toString());
+            deadArray.put(playerObj);
+        }
+        logEvent(phase, "DEAD_PLAYERS", deadArray);
+    }
+
+    private void alivePlayersJson(String phase) {
+        JSONArray aliveArray = new JSONArray();
+        for (String p : playerRoles.keySet()) {
+            JSONObject playerObj = new JSONObject();
+            playerObj.put("name", p);
+            playerObj.put("role", playerRoles.get(p).toString());
+            aliveArray.put(playerObj);
+        }
+        logEvent(phase, "ALIVE_PLAYERS", aliveArray);
+    }
+
     private void logEvent(String phase, String type, JSONArray data) {
         JSONObject event = new JSONObject();
         event.put("round", round);
@@ -417,6 +426,19 @@ public class GameMasterAgent extends Agent {
         gameState.put("events", eventLog);
 
         System.out.println(event.toString());
+    }
+
+    private void saveGameStateToFile() {
+        try {
+            Path path = Paths.get("game_state.json");
+            Files.write(
+                    path,
+                    gameState.toString(2).getBytes(StandardCharsets.UTF_8)
+            );
+            System.out.println("Json guardado " + path.toAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
