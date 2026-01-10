@@ -5,6 +5,7 @@ import jade.lang.acl.ACLMessage;
 import model.MessageType;
 
 import java.util.Map;
+import java.util.Random;
 
 public class DoctorAgent extends VillagerAgent {
 
@@ -60,5 +61,24 @@ public class DoctorAgent extends VillagerAgent {
             send(protectMsg);
             System.out.println("Doctor " + getLocalName() + " is protecting " + protectedAgent);
         }
+    }
+
+    @Override
+    protected String decideRole() {
+        Random random = new Random();
+        double decision = random.nextDouble();
+        String role = "Doctor";
+        if (decision < 0.1) {
+            role = "WEREWOLF"; // jogada arriscada os werewolfs não o focam mas os aldeões podem expulsá-lo 
+        }else if (decision < 0.7) {
+            role = "VILLAGER";
+        } else  if (decision < 0.8) {
+            role = "DOCTOR";      // doctor n se quer revelar pois n é seguro 
+        } else  if (decision < 0.9) {
+            role = "SEER";
+        } else  if (decision < 1) {
+            role = "HUNTER";
+        }
+        return role;
     }
 }

@@ -95,9 +95,11 @@ public class GameMasterAgent extends Agent {
 
         @Override
         public void onTick() {
-            // TODO votação, onde recebe os votos via ACL, e verifica um treshold para matar alguem
+            //tempo para discutirem
             ticks++;
             if (ticks >= 2) {
+                broadcastSystem("Start Voting", MessageType.VOTE);
+            }else if (ticks >= 4) {
                 stop();
             }
         }

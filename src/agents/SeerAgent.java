@@ -1,5 +1,7 @@
 package agents;
 
+import java.util.Random;
+
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import model.MessageType;
@@ -57,5 +59,23 @@ public class SeerAgent extends VillagerAgent {
             super.updateTrust(sender, 1.0);
         }
     }
-
+    
+    @Override
+    protected String decideRole() {
+        Random random = new Random();
+        double decision = random.nextDouble();
+        String role = "SEER";
+        if (decision < 0.1) {
+            role = "WEREWOLF"; // jogada arriscada os werewolfs não o focam mas os aldeões podem expulsá-lo 
+        }else if (decision < 0.5) {
+            role = "VILLAGER";
+        } else  if (decision < 0.6) {
+            role = "DOCTOR";
+        } else  if (decision < 0.9) {
+            role = "SEER";
+        } else  if (decision < 1) {
+            role = "HUNTER";
+        }
+        return role;
+    }
 }

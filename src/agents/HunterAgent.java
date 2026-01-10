@@ -1,5 +1,7 @@
 package agents;
 
+import java.util.Random;
+
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -40,5 +42,24 @@ public class HunterAgent extends VillagerAgent {
             kill.addReceiver(new AID(sender, AID.ISLOCALNAME));
             send(kill);
         }
+    }
+
+    @Override
+    protected String decideRole() {
+        Random random = new Random();
+        double decision = random.nextDouble();
+        String role = "Hunter";
+        if (decision < 0.05) {
+            role = "WEREWOLF"; // jogada arriscada os werewolfs não o focam mas os aldeões podem expulsá-lo 
+        }else if (decision < 0.3) {
+            role = "VILLAGER";
+        } else  if (decision < 0.4) {
+            role = "DOCTOR";
+        } else  if (decision < 0.5) {
+            role = "SEER";
+        } else  if (decision < 1) {
+            role = "HUNTER";  // hunter é seguro pois ninguem o quer atacar
+        }
+        return role;
     }
 }

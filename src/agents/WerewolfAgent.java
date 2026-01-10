@@ -7,6 +7,7 @@ import model.MessageType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class WerewolfAgent extends VillagerAgent {
     private List<String> wolves;
@@ -132,5 +133,113 @@ public class WerewolfAgent extends VillagerAgent {
             String wolvesList = parts[1].trim();
             this.wolves = new ArrayList<>(Arrays.asList(wolvesList.split(",")));
         }
+    }
+
+    @Override
+    protected void handleRoleClaim(String content, String sender) {
+        super.handleRoleClaim(content, sender);
+        String[] parts = content.split(" ");
+        if (parts.length >= 2) {
+            String Role = parts[0];
+            double senderTrust = super.trust.get(sender);
+            if (Role.equals("VILLAGER") && !this.wolves.contains(sender)) {
+                super.updateTrust(sender, -0.1); // não precisa matar um villager rápido
+            } else if (Role.equals("SEER") && !this.wolves.contains(sender)) {
+                super.updateTrust(sender, -1); // prioridade maxima de matar
+            } else if (Role.equals("WEREWOLF") && !this.wolves.contains(sender)) {
+                super.updateTrust(sender, 1); // qualquer um que diga que é lobisomem e n é, é conveniente 
+            } else if (Role.equals("HUNTER")) {
+                super.updateTrust(sender, 0); // hunter é o menos prioritário para matar pois pode significar uma morte de werewolf
+            }
+        }
+    }
+
+    // 50% de chance de acusar alguém, 20% de chance de revelar o seu papel, 20% de chance de dizer em quem confia mais, 10% de ficar calado werewolf são mais vocais
+    @Override
+    protected void discuss() {
+        Random random = new Random();
+        double decision = random.nextDouble();
+        if (decision < 0.5) {
+            acuse();
+        } else if (decision < 0.7) {
+            revealRole();
+        } else if (decision < 0.9) {
+            trustSomeone();
+        } else {
+            // remain silent
+        }
+    }
+
+    //acusa o agente em quem menos confia, ignorando outros werewolfs
+    @Override
+    protected void acuse() {
+        String target = null;
+        double minTrust = Double.POSITIVE_INFINITY;
+        for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
+            String name = e.getKey();
+            Double t = e.getValue();
+            if (name.equals(getLocalName()) || t == null || this.wolves.contains(name)) continue;
+            if (t < minTrust && !this.wolves.contains(name)) {
+                minTrust = t;
+                target = name;
+            }
+        }
+        if (target != null) {
+            ACLMessage accusation = new ACLMessage(ACLMessage.INFORM);
+            accusation.setConversationId(MessageType.ACCUSATION.name());
+            accusation.setContent(target + " is suspicious");
+            for (String p : super.trust.keySet()) {
+                if (!p.equals(getLocalName())) {
+                    accusation.addReceiver(new AID(p, AID.ISLOCALNAME));
+                }
+            }
+            send(accusation);
+        }
+    }
+
+    // diz em quem confia mais, apenas nos werewolfs outros werewolfs
+    @Override
+    protected void trustSomeone() {
+        String target = null;
+        double maxTrust = Double.NEGATIVE_INFINITY;
+        for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
+            String name = e.getKey();
+            Double t = e.getValue();
+            if (name.equals(getLocalName()) || t == null || this.wolves.contains(name)) continue;
+            if (t > maxTrust && this.wolves.contains(name)) {
+                maxTrust = t;
+                target = name;
+            }
+        }
+        if (target != null) {
+            ACLMessage trustMsg = new ACLMessage(ACLMessage.INFORM);
+            trustMsg.setConversationId(MessageType.TRUST.name());
+            trustMsg.setContent(target + " is trustworthy");
+            for (String p : super.trust.keySet()) {
+                if (!p.equals(getLocalName())) {
+                    trustMsg.addReceiver(new AID(p, AID.ISLOCALNAME));
+                }
+            }
+            send(trustMsg);
+        }
+    }
+
+    @Override
+    protected String decideRole() {
+        Random random = new Random();
+        double decision = random.nextDouble();
+        String role = "WEREWOLF";
+        if (decision < 0.02) {
+            role = "WEREWOLF"; // não tem motivo de se revelar
+        }else if (decision < 0.4) {
+            role = "VILLAGER";
+        } else  if (decision < 0.5) {
+            role = "DOCTOR";
+        } else  if (decision < 0.8) {
+            role = "SEER";      //seer é favoravel para manipular os aldeoes
+        } else  if (decision < 1) {
+            role = "HUNTER";    // hunter é seguro pois ninguem o quer atacar
+        }
+        return role;
     }
 }
