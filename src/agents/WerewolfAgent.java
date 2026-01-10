@@ -19,21 +19,23 @@ public class WerewolfAgent extends VillagerAgent {
     protected void processMessage(MessageType messageType, String content, String sender) {
         super.processMessage(messageType, content, sender);
         if (messageType == MessageType.WEREWOLF_ATTACK) {
+            // Recebeu a proposta para atacar alguém
             handleWerewolfAttack(sender);
         } else if (messageType == MessageType.WEREWOLF_QUESTION) {
+            // Os werewolfs receberam a pergunta de outro werewolf sobre quem atacar
             handleWerewolfQuestion(sender);
         } else if (messageType == MessageType.WEREWOLF_ANSWER) {
-            // Recebeu resposta de outro lobo sobre quem atacar
+            // O werewolf que perguntou recebe a resposta de outro lobo sobre quem atacar
             handleWerewolfAnswer(content);
         } else if (messageType == MessageType.WEREWOLF_PLAYERS) {
-            // Recebe a lista de lobos
+            // Recebe a lista de werewolfs
             this.wolves = List.of(content.split(","));
         }
     }
 
-    //Pergunta aos outros lobos quem atacar
+    //Pergunta aos outros werewolfs quem atacar
     private void werewolfQuestion() {
-        ACLMessage question = new ACLMessage(ACLMessage.INFORM);
+        ACLMessage question = new ACLMessage(ACLMessage.REQUEST);  // faz a pergunta aos outros werewolfs
         question.setConversationId(MessageType.WEREWOLF_QUESTION.name());
         question.setContent("Quem devemos atacar?");
         for (String wolf : wolves) {
@@ -44,7 +46,7 @@ public class WerewolfAgent extends VillagerAgent {
         send(question);
     }
 
-    //Recebeu a pergunta de outro lobo sobre quem atacar e decide quem sugerir
+    //Recebeu a pergunta de outro werewolf sobre quem atacar e decide quem sugerir
     private void handleWerewolfQuestion(String sender) {
         String target = null;
         double minTrust = Double.POSITIVE_INFINITY;
@@ -58,7 +60,7 @@ public class WerewolfAgent extends VillagerAgent {
             }
         }
         if (target != null) {
-            ACLMessage answer = new ACLMessage(ACLMessage.INFORM);
+            ACLMessage answer = new ACLMessage(ACLMessage.PROPAGATE); // propaga ao outro werewolf, o player que o werewolf tem menos confiança
             answer.setConversationId(MessageType.WEREWOLF_ANSWER.name());
             answer.setContent(target);
             answer.addReceiver(new AID(sender, AID.ISLOCALNAME));
@@ -66,7 +68,7 @@ public class WerewolfAgent extends VillagerAgent {
         }
     }
 
-    //Recebeu a resposta de outro lobo sobre quem atacar
+    //Recebeu a resposta de outro werewolf sobre quem atacar
     private void handleWerewolfAnswer(String content) {
         String target = content.trim();
         super.updateTrust(target, 1.0);
@@ -74,7 +76,7 @@ public class WerewolfAgent extends VillagerAgent {
         handleWerewolfAttack("GameMaster");
     }
 
-    //Decide quem atacar com 50/50 de perguntar aos outros lobos ou escolher o mais confiável, se o target é sugestão ele envia o ataque ao GameMaster
+    //Decide quem atacar com 50/50 de perguntar aos outros werewolfs ou escolher o mais confiável, se o target é sugestão ele envia o ataque ao GameMaster
     private void handleWerewolfAttack(String sender) {
         String target = null;
         double maxTrust = Double.NEGATIVE_INFINITY;

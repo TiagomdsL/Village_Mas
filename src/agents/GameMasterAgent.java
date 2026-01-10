@@ -129,7 +129,7 @@ public class GameMasterAgent extends Agent {
             super(a, period);
         }
 
-        // manda msg as roles especiais que estes conseguem agir a noite (no caso hunter, doctor, werewolf e seer)
+        // manda requests as roles especiais que estes conseguem agir a noite (no caso hunter, doctor, werewolf e seer)
         @Override
         public void onStart() {
             super.onStart();
@@ -138,19 +138,19 @@ public class GameMasterAgent extends Agent {
             for (String p : playerRoles.keySet()) {
                 Role r = playerRoles.get(p);
                 if (r == Role.WEREWOLF) {
-                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                    ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
                     msg.addReceiver(new AID(p, AID.ISLOCALNAME));
                     msg.setContent("It's night. Choose someone to kill.");
                     msg.setConversationId(MessageType.WEREWOLF_ATTACK.toString());
                     send(msg);
                 } else if (r == Role.DOCTOR) {
-                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                    ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
                     msg.addReceiver(new AID(p, AID.ISLOCALNAME));
                     msg.setContent("It's night. Choose someone to protect.");
                     msg.setConversationId(MessageType.DOCTOR_PROTECT.toString());
                     send(msg);
                 } else if (r == Role.SEER) {
-                    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+                    ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
                     msg.addReceiver(new AID(p, AID.ISLOCALNAME));
                     msg.setContent("revela");
                     msg.setConversationId(MessageType.SEER_REVEAL.toString());
@@ -251,13 +251,12 @@ public class GameMasterAgent extends Agent {
 
             long deadline = System.currentTimeMillis() + timeoutMs;
             MessageTemplate mt = MessageTemplate.and(
-                    MessageTemplate.MatchPerformative(ACLMessage.INFORM),
+                    MessageTemplate.MatchPerformative(ACLMessage.SUBSCRIBE),
                     MessageTemplate.MatchConversationId(MessageType.ROLE_QUERY.toString()));
-
 
             while (System.currentTimeMillis() < deadline) {
                 long wait = deadline - System.currentTimeMillis();
-                ACLMessage reply = blockingReceive(mt, wait);
+                ACLMessage reply = blockingReceive(mt, wait); // gamemaster recolhe as subscrições para participar do jogo
                 if (reply == null)
                     break;
                 String sender = reply.getSender().getLocalName();

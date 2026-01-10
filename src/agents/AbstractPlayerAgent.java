@@ -74,9 +74,8 @@ public abstract class AbstractPlayerAgent extends Agent {
 
     protected void respondToRoleQuery(String sender) {
         System.out.println(getLocalName() + " respondendo role query: " + myRole.name());
-        ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
+        ACLMessage reply = new ACLMessage(ACLMessage.SUBSCRIBE); // subscreve ao gamemaster para participar do jogo, enviando a sua role
         reply.addReceiver(new AID(sender, AID.ISLOCALNAME));
-        reply.setPerformative(ACLMessage.INFORM);
         reply.setConversationId(MessageType.ROLE_QUERY.toString());
         reply.setContent("ROLE:" + myRole.name());
         send(reply);

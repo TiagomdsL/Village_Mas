@@ -35,7 +35,7 @@ public class SeerAgent extends VillagerAgent {
             }
         }
         if (target != null) {
-            ACLMessage reveal = new ACLMessage(ACLMessage.INFORM);
+            ACLMessage reveal = new ACLMessage(ACLMessage.REQUEST); // requesita a role ao agente
             reveal.setConversationId(MessageType.SEER_REVEAL.name());
             reveal.setContent("I see you, but u are distracted.");
             reveal.addReceiver(new AID(target, AID.ISLOCALNAME)); // ao inves de ver o GameMaster, ve o agente em questao diretamente
