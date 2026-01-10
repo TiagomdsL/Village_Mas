@@ -123,4 +123,14 @@ public class WerewolfAgent extends VillagerAgent {
             send(vote);
         }
     }
+
+    @Override
+    protected void handleSystem(String content) {
+        super.handleSystem(content);
+        if (content.equals("Werewolves players")) {
+            String[] parts = content.split(":");
+            String wolvesList = parts[1].trim();
+            this.wolves = List.of(wolvesList.split(","));
+        }
+    }
 }

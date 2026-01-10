@@ -47,16 +47,16 @@ public class GameMasterAgent extends Agent {
     private class GamePhaseBehaviour extends FSMBehaviour {
         public GamePhaseBehaviour() {
             registerFirstState(new SetupPlayersBehaviour(), GamePhase.SETUP.toString());
-            registerState(new DayPhaseBehaviour(myAgent, 1000), GamePhase.VOTING.toString());
+            registerState(new DayPhaseBehaviour(myAgent, 1000), GamePhase.Day.toString());
             registerState(new NightPhaseBehaviour(myAgent, 1000), GamePhase.NIGHT.toString());
             registerLastState(new EndedBehaviour(), GamePhase.ENDED.toString());
 
-            registerTransition(GamePhase.SETUP.toString(), GamePhase.VOTING.toString(), 0);
+            registerTransition(GamePhase.SETUP.toString(), GamePhase.Day.toString(), 0);
 
-            registerTransition(GamePhase.VOTING.toString(), GamePhase.NIGHT.toString(), 0);
-            registerTransition(GamePhase.VOTING.toString(), GamePhase.ENDED.toString(), 1);
+            registerTransition(GamePhase.Day.toString(), GamePhase.NIGHT.toString(), 0);
+            registerTransition(GamePhase.Day.toString(), GamePhase.ENDED.toString(), 1);
 
-            registerTransition(GamePhase.NIGHT.toString(), GamePhase.VOTING.toString(), 0);
+            registerTransition(GamePhase.NIGHT.toString(), GamePhase.Day.toString(), 0);
             registerTransition(GamePhase.NIGHT.toString(), GamePhase.ENDED.toString(), 1);
 
         }
@@ -187,7 +187,7 @@ public class GameMasterAgent extends Agent {
 
             broadcastSystem("Night phase ended.", MessageType.SYSTEM);
             GamePhaseBehaviour fsm = (GamePhaseBehaviour) getParent();
-            fsm.registerState(new DayPhaseBehaviour(myAgent, 1000), GamePhase.VOTING.toString()); // para garantir que o dia seja a próxima fase devido aos tickes após o primeir dia
+            fsm.registerState(new DayPhaseBehaviour(myAgent, 1000), GamePhase.Day.toString()); // para garantir que o dia seja a próxima fase devido aos tickes após o primeir dia
 
             return isEnded();
         }

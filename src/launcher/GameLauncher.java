@@ -65,14 +65,6 @@ public class GameLauncher {
             logger.start();
 
             List<String> playerNames = generatePlayerNames();
-
-            // Criar Game Master (sem args; GameMaster obtém players/roles via DF)
-            AgentController gm = container.createNewAgent(
-                    "GameMaster",
-                    "agents.GameMasterAgent",
-                    null);
-            gm.start();
-
             // Gerar e atribuir roles localmente aqui para escolher a classe do agente a
             // criar
             List<Role> rolePool = buildRolePool(playerNames.size());
@@ -90,6 +82,14 @@ public class GameLauncher {
                         null);
                 agent.start();
             }
+
+            // Criar Game Master (sem args; GameMaster obtém players/roles via DF)
+            AgentController gm = container.createNewAgent(
+                    "GameMaster",
+                    "agents.GameMasterAgent",
+                    null);
+            gm.start();
+
 
             System.out.println("Game launched with configuration:");
             printConfiguration();

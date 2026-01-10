@@ -2,8 +2,7 @@ package model;
 
 public enum GamePhase {
     SETUP,
-    DAY,
-    VOTING,
+    Day,
     NIGHT,
     ENDED
 }
