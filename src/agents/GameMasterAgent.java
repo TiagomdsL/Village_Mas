@@ -36,29 +36,13 @@ public class GameMasterAgent extends Agent {
 
     @Override
     protected void setup() {
-
-        toKill.add("Player1"); // apenas para testes
-
-        // Registrar o GameMaster no DF para que players possam localizá-lo
-        DFAgentDescription myDesc = new DFAgentDescription();
-        myDesc.setName(getAID());
-        ServiceDescription mySd = new ServiceDescription();
-        mySd.setType("gamemaster");
-        mySd.setName("GameMaster");
-        myDesc.addServices(mySd);
-        try {
-            DFService.register(this, myDesc);
-        } catch (FIPAException e) {
-            e.printStackTrace();
-        }
-
         addBehaviour(new GamePhaseBehaviour());
     }
 
     private class GamePhaseBehaviour extends FSMBehaviour {
         public GamePhaseBehaviour() {
             registerFirstState(new SetupPlayersBehaviour(), GamePhase.SETUP.toString());
-            registerState(new VotePhaseBehaviour(myAgent, 1000), GamePhase.VOTING.toString());
+            registerState(new DayPhaseBehaviour(myAgent, 1000), GamePhase.VOTING.toString());
             registerState(new NightPhaseBehaviour(myAgent, 1000), GamePhase.NIGHT.toString());
             registerLastState(new EndedBehaviour(), GamePhase.ENDED.toString());
 
@@ -66,7 +50,7 @@ public class GameMasterAgent extends Agent {
 
             registerTransition(GamePhase.VOTING.toString(), GamePhase.NIGHT.toString(), 0);
             registerTransition(GamePhase.VOTING.toString(), GamePhase.ENDED.toString(), 1);
-//
+
             registerTransition(GamePhase.NIGHT.toString(), GamePhase.VOTING.toString(), 0);
             registerTransition(GamePhase.NIGHT.toString(), GamePhase.ENDED.toString(), 1);
 
@@ -90,10 +74,10 @@ public class GameMasterAgent extends Agent {
         }
     }
 
-    private class VotePhaseBehaviour extends TickerBehaviour {
+    private class DayPhaseBehaviour extends TickerBehaviour {
         private int ticks = 0;
 
-        public VotePhaseBehaviour(Agent a, long period) {
+        public DayPhaseBehaviour(Agent a, long period) {
             super(a, period);
         }
 
@@ -101,7 +85,7 @@ public class GameMasterAgent extends Agent {
         public void onStart() {
             super.onStart();
             ticks = 0;
-            broadcastSystem("Vote phase started.", MessageType.SYSTEM);
+            broadcastSystem("Day phase started.", MessageType.SYSTEM);
         }
 
         @Override
@@ -116,8 +100,9 @@ public class GameMasterAgent extends Agent {
         @Override
         public int onEnd() {
             killPlayers();
+            broadcastSystem("Day phase ended.", MessageType.SYSTEM);
             GamePhaseBehaviour fsm = (GamePhaseBehaviour) getParent();
-            fsm.registerState(new NightPhaseBehaviour(myAgent, 1000), GamePhase.NIGHT.toString());
+            fsm.registerState(new NightPhaseBehaviour(myAgent, 1000), GamePhase.NIGHT.toString()); // para garantir que a noite seja a próxima fase devido aos tickes após a primeira noite
             return isEnded();
         }
     }
@@ -163,7 +148,7 @@ public class GameMasterAgent extends Agent {
         protected void onTick() {
             ticks++;
 
-            ACLMessage msg = receive(); //blockingReceive();
+            ACLMessage msg = receive();
             if (msg != null) {
                 String sender = msg.getSender().getLocalName();
                 String content = msg.getContent();
@@ -195,9 +180,9 @@ public class GameMasterAgent extends Agent {
             toDiePlayers.clear();
             killPlayers();
 
-
+            broadcastSystem("Night phase ended.", MessageType.SYSTEM);
             GamePhaseBehaviour fsm = (GamePhaseBehaviour) getParent();
-            fsm.registerState(new VotePhaseBehaviour(myAgent, 1000), GamePhase.VOTING.toString());
+            fsm.registerState(new DayPhaseBehaviour(myAgent, 1000), GamePhase.VOTING.toString()); // para garantir que o dia seja a próxima fase devido aos tickes após o primeir dia
 
             return isEnded();
         }
