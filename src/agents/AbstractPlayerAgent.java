@@ -178,15 +178,18 @@ public abstract class AbstractPlayerAgent extends Agent {
                 trust.remove(deadPlayerStr);
                 beliefs.remove(deadPlayerStr);
 
-                if (!roleStr.equals("WEREWOLF")) {
-                    for (String p : trust.keySet()) {
-                        if (!p.equals(deadPlayerStr)) {
+                for (String p : trust.keySet()) {
+                    if (!p.equals(deadPlayerStr)) {
+                        if (!roleStr.equals(Role.WEREWOLF.name())) {
                             updateTrust(p, -0.15); // diminui a confiança em outros jogadores, causando panico
+                        } else {
+                            updateTrust(p, 0.15); // aumenta a confiança em outros jogadores, aliviando o medo
                         }
                     }
                 }
 
 //                System.out.println(getLocalName() + " removed dead player from trust/beliefs: " + deadPlayer + " bc is dead.");
+
 
             } catch (Exception e) {
                 System.err.println(getLocalName() + " failed to parse death message: " + content);
