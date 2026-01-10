@@ -42,11 +42,13 @@ public class GameMasterAgent extends Agent {
     private final Map<String, Role> playerRoles = new HashMap<>();
 
     JSONObject gameState = new JSONObject();
+    JSONArray eventLog = new JSONArray();
     private int round = 1;
 
 
     @Override
     protected void setup() {
+        gameState.put("events", eventLog);
         addBehaviour(new GamePhaseBehaviour());
     }
 
@@ -81,7 +83,6 @@ public class GameMasterAgent extends Agent {
             broadcastSystem("Init game", MessageType.SYSTEM);
             broadcastWerewolvesPlayers();
             broadcastAlivePlayers();
-            alivePlayersJson();
             return 0;
         }
     }
@@ -112,8 +113,10 @@ public class GameMasterAgent extends Agent {
 
         @Override
         public int onEnd() {
-            killPlayersJson("Votacao");
+            alivePlayersJson("DAY");
+            killPlayersJson("DAY");
             killPlayers();
+
             broadcastSystem("Day phase ended.", MessageType.SYSTEM);
             GamePhaseBehaviour fsm = (GamePhaseBehaviour) getParent();
             fsm.registerState(new NightPhaseBehaviour(myAgent, 1000), GamePhase.NIGHT.toString()); // para garantir que a noite seja a próxima fase devido aos tickes após a primeira noite
@@ -192,8 +195,8 @@ public class GameMasterAgent extends Agent {
                 }
             }
             toDiePlayers.clear();
-            alivePlayersJson();
-            killPlayersJson("Noite");
+            alivePlayersJson("NIGHT");
+            killPlayersJson("NIGHT");
             killPlayers();
 
             broadcastSystem("Night phase ended.", MessageType.SYSTEM);
@@ -208,6 +211,8 @@ public class GameMasterAgent extends Agent {
     private class EndedBehaviour extends OneShotBehaviour {
         @Override
         public void action() {
+
+            System.out.println(gameState.toString(2));
             for (Role role : playerRoles.values()) {
                 if (role == Role.WEREWOLF) {
                     broadcastSystem("Game ended, vitoria dos lobisomens.", MessageType.SYSTEM);
@@ -295,16 +300,15 @@ public class GameMasterAgent extends Agent {
 
     }
 
-    private void alivePlayersJson() {
+    private void alivePlayersJson(String phase) {
         JSONArray aliveArray = new JSONArray();
         for (String p : playerRoles.keySet()) {
-            JSONObject playersObj = new JSONObject();
-            playersObj.put(p, playerRoles.get(p).toString());
-            aliveArray.put(playersObj);
+            JSONObject playerObj = new JSONObject();
+            playerObj.put("name", p);
+            playerObj.put("role", playerRoles.get(p).toString());
+            aliveArray.put(playerObj);
         }
-
-        gameState.put("alive_players" +round, aliveArray);
-        //System.out.println(gameState.toString());
+        logEvent(phase, "ALIVE_PLAYERS", aliveArray);
     }
 
     private void broadcastWerewolvesPlayers() {
@@ -363,17 +367,17 @@ public class GameMasterAgent extends Agent {
 
     }
 
-    public void killPlayersJson(String fase) {
+    private void killPlayersJson(String phase) {
         JSONArray deadArray = new JSONArray();
         for (String p : toKill) {
-            JSONObject playersObj = new JSONObject();
-            playersObj.put(p, playerRoles.get(p).toString());
-            deadArray.put(playersObj);
-
+            JSONObject playerObj = new JSONObject();
+            playerObj.put("name", p);
+            playerObj.put("role", playerRoles.get(p).toString());
+            deadArray.put(playerObj);
         }
-        gameState.put("dead_players" + fase + round, deadArray);
-        System.out.println(gameState.toString());
+        logEvent(phase, "DEAD_PLAYERS", deadArray);
     }
+
 
     // verificação da condição de fim de jogo
     private int isEnded() {
@@ -400,4 +404,20 @@ public class GameMasterAgent extends Agent {
             toKill.add(content);
         }
     }
+
+    private void logEvent(String phase, String type, JSONArray data) {
+        JSONObject event = new JSONObject();
+        event.put("round", round);
+        event.put("phase", phase);
+        event.put("type", type);
+        event.put("data", data);
+
+        eventLog.put(event);
+
+        gameState.put("events", eventLog);
+
+        System.out.println(event.toString());
+    }
+
+
 }
