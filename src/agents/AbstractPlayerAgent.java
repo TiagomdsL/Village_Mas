@@ -12,6 +12,7 @@ import model.MessageType;
 import model.Role;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,6 +29,8 @@ public abstract class AbstractPlayerAgent extends Agent {
 
     // Métrica de confiança [0,1]
     protected Map<String, Double> trust = new HashMap<>();
+
+    protected List<String> wasWerewolf = new java.util.ArrayList<>(); 
 
 
     @Override
@@ -93,6 +96,20 @@ public abstract class AbstractPlayerAgent extends Agent {
 
     protected void updateTrust(String player, double delta) {
         trust.put(player, Math.max(0, Math.min(1, trust.get(player) + delta)));
+    }
+
+    protected void updateBelief(String player, Role role, double prob) {
+        Map<Role, Double> probs = beliefs.get(player);
+        if (probs == null) return;
+        probs.put(role, prob);
+        // normalizar
+        double total = 0.0;
+        for (double p : probs.values()) {
+            total += p;
+        }
+        for (Role r : probs.keySet()) {
+            probs.put(r, probs.get(r) / total);
+        }
     }
 
     protected void checkAlivePlayers(String content) {
@@ -182,6 +199,7 @@ public abstract class AbstractPlayerAgent extends Agent {
                         if (!roleStr.equals(Role.WEREWOLF.name())) {
                             updateTrust(p, -0.15); // diminui a confiança em outros jogadores, causando panico
                         } else {
+                            wasWerewolf.add(deadPlayerStr);
                             updateTrust(p, 0.15); // aumenta a confiança em outros jogadores, aliviando o medo
                         }
                     }

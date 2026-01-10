@@ -1,5 +1,7 @@
 package agents;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import jade.core.AID;
@@ -7,6 +9,11 @@ import jade.lang.acl.ACLMessage;
 import model.MessageType;
 
 public class VillagerAgent extends AbstractPlayerAgent {
+    protected Map<String, List<String>> acusations = new java.util.HashMap<>();
+    protected Map<String, List<String>> trusts = new java.util.HashMap<>();
+    protected String currSeer = "";
+    protected String currDoctor = "";
+    protected List<String> wasProtected = new java.util.ArrayList<>();
 
     @Override
     protected void setup() {
@@ -22,6 +29,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
             return; // Formato inválido
         }
         String accusedAgent = parts[0];
+        acusations.get(sender).add(accusedAgent);
         String reason = parts[1]; // por enquanto n tem uso
         double senderTrust = super.trust.get(sender);
         double accusedTrust = super.trust.get(accusedAgent);
@@ -48,6 +56,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
             return; // Formato inválido
         }
         String trustedAgent = parts[0];
+        trusts.get(sender).add(trustedAgent);
         String reason = parts[1]; // por enquanto n tem uso
         double senderTrust = super.trust.get(sender);
         double trustedTrust = super.trust.get(trustedAgent);
@@ -120,7 +129,15 @@ public class VillagerAgent extends AbstractPlayerAgent {
     @Override
     protected void handleSystem(String content) {
         super.handleSystem(content);
+        if (content.contains("protected by doctor")) {
+            String protectedAgent = content
+                    .replace("The Player:", "")
+                    .replace("is Dead but was protected by doctor", "")
+                    .trim();
+            wasProtected.add(protectedAgent);
+        }
         if (content.contains("Day phase started.")) {
+            reactToAmbient();
             discuss();
         }
     }
@@ -245,5 +262,86 @@ public class VillagerAgent extends AbstractPlayerAgent {
             role = "HUNTER";
         }
         return role;
+    }
+
+    protected void reactToAmbient() {
+        for (java.util.Map.Entry<String, java.util.Map<model.Role, Double>> entry : super.beliefs.entrySet()) {
+            String playerName = entry.getKey();
+            java.util.Map<model.Role, Double> roleProbs = entry.getValue();
+            
+            // Pular a si próprio
+            if (playerName.equals(getLocalName())) continue;
+            
+            double trustLevel = super.trust.getOrDefault(playerName, 0.5);
+               
+            // Se foi identificado como werewolf antes
+            for (String acusees : acusations.get(playerName)) {
+                if (super.wasWerewolf.contains(acusees)) {
+                    super.updateBelief(playerName, model.Role.SEER, 1); // quase certeza
+                }
+            }
+
+            for (String trusteds : trusts.get(playerName)) {
+                if (this.wasProtected.contains(trusteds)) {
+                    super.updateBelief(playerName, model.Role.DOCTOR, 1); // quase certeza
+                }
+            }
+            // Baseado em trust
+            if (trustLevel > 0.7 && this.myRole != model.Role.WEREWOLF) {
+                // Alta confiança: mais provável ser DOCTOR, SEER ou VILLAGER
+                super.updateBelief(playerName, model.Role.DOCTOR, roleProbs.get(model.Role.DOCTOR) + 0.10);
+                super.updateBelief(playerName, model.Role.SEER, roleProbs.get(model.Role.SEER) + 0.10);
+                super.updateBelief(playerName, model.Role.WEREWOLF, roleProbs.get(model.Role.WEREWOLF) - 0.15);
+                super.updateBelief(playerName, model.Role.WEREWOLF, roleProbs.get(model.Role.HUNTER) - 0.10);
+            } else if (trustLevel < 0.3 && this.myRole != model.Role.WEREWOLF) {
+                // Baixa confiança: mais provável ser WEREWOLF
+                super.updateBelief(playerName, model.Role.WEREWOLF, roleProbs.get(model.Role.WEREWOLF) + 0.30);
+                super.updateBelief(playerName, model.Role.VILLAGER, roleProbs.get(model.Role.HUNTER) + 0.10);
+                super.updateBelief(playerName, model.Role.DOCTOR, roleProbs.get(model.Role.DOCTOR) - 0.10);
+                super.updateBelief(playerName, model.Role.SEER, roleProbs.get(model.Role.SEER) - 0.10);
+            }
+            else if(this.myRole != model.Role.WEREWOLF) {
+                // Confiança média: ligeira inclinação para VILLAGER
+                super.updateBelief(playerName, model.Role.VILLAGER, roleProbs.get(model.Role.VILLAGER) + 0.05);
+                super.updateBelief(playerName, model.Role.WEREWOLF, roleProbs.get(model.Role.WEREWOLF) - 0.05);
+            }
+            
+            // Se confia e foi mencionado como confiável em trusts
+            if (trusts.containsValue(playerName) && trustLevel > 0.5 && this.myRole != model.Role.WEREWOLF) {
+                super.updateBelief(playerName, model.Role.VILLAGER, roleProbs.get(model.Role.VILLAGER) + 0.05);
+            }
+            if(this.myRole == model.Role.WEREWOLF){
+                super.updateBelief(playerName, model.Role.VILLAGER, roleProbs.get(model.Role.VILLAGER) + 0.10);
+            }
+        }
+        
+        // Identifica o jogador com maior probabilidade de ser DOCTOR e SEER
+        String maxDoctor = null;
+        double maxDoctorProb = 0.0;
+        String maxSeer = null;
+        double maxSeerProb = 0.0;
+        
+        for (java.util.Map.Entry<String, java.util.Map<model.Role, Double>> entry : super.beliefs.entrySet()) {
+            String playerName = entry.getKey();
+            java.util.Map<model.Role, Double> roleProbs = entry.getValue();
+            
+            if (playerName.equals(getLocalName())) continue;
+            
+            double doctorProb = roleProbs.get(model.Role.DOCTOR);
+            double seerProb = roleProbs.get(model.Role.SEER);
+            
+            if (doctorProb > maxDoctorProb) {
+                maxDoctorProb = doctorProb;
+                maxDoctor = playerName;
+            }
+            
+            if (seerProb > maxSeerProb) {
+                maxSeerProb = seerProb;
+                maxSeer = playerName;
+            }
+        }
+        
+        this.currDoctor = (maxDoctor != null) ? maxDoctor : "";
+        this.currSeer = (maxSeer != null) ? maxSeer : "";
     }
 }

@@ -54,7 +54,7 @@ public class SeerAgent extends VillagerAgent {
 //        System.out.println("Ent a role deste é " + content);
 
         if (content.equals(Role.WEREWOLF.name())) {
-            super.updateTrust(sender, 0.0);
+            super.updateTrust(sender, -1.0);
         } else {
             super.updateTrust(sender, 1.0);
         }

@@ -242,4 +242,18 @@ public class WerewolfAgent extends VillagerAgent {
         }
         return role;
     }
+
+    @Override
+    protected void reactToAmbient(){
+        super.reactToAmbient();
+        
+        // Coloca os outros werewolfs com 100% de certeza que são werewolfs
+        for (String wolf : wolves) {
+            if (!wolf.equals(getLocalName())) {
+                super.updateBelief(wolf, model.Role.WEREWOLF, 1.0);
+            }
+        }
+        super.updateTrust(super.currSeer, -1.0); // se o seer está vivo, é prioridade máxima matar
+        super.updateTrust(super.currDoctor, -0.5); // doctor é prioridade alta de matar
+    }
 }
