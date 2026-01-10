@@ -1,19 +1,24 @@
 package agents;
 
-import jade.core.Agent;
 import jade.core.AID;
+import jade.core.Agent;
 import jade.core.behaviours.FSMBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
-import model.*;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import model.GamePhase;
+import model.MessageType;
+import model.Role;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Game Master:
@@ -22,16 +27,16 @@ import java.util.*;
  * - faz logging
  */
 public class GameMasterAgent extends Agent {
-    private List<String>
+    private final List<String>
             toKill = new ArrayList<>(),
             protectedPlayers = new ArrayList<>(),
             werewolvesPlayers = new ArrayList<>();
 
     // lista de players a morrer (votação dos werewolfes)
-    private Map<String, Integer> toDiePlayers = new HashMap<>();
+    private final Map<String, Integer> toDiePlayers = new HashMap<>();
 
     // map de roles obtidos por DF
-    private Map<String, Role> playerRoles = new HashMap<>();
+    private final Map<String, Role> playerRoles = new HashMap<>();
 
 
     @Override
@@ -213,9 +218,8 @@ public class GameMasterAgent extends Agent {
      * "ROLE:<ROLE_NAME>".
      *
      * @param timeoutMs tempo total (ms) para aguardar respostas
-     * @return mapa jogadorLocalName -> Role (somente respostas válidas)
      */
-    private Map<String, Role> queryRolesFromDF(long timeoutMs) {
+    private void queryRolesFromDF(long timeoutMs) {
         DFAgentDescription template = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
         sd.setType("player");
@@ -224,7 +228,7 @@ public class GameMasterAgent extends Agent {
         try {
             DFAgentDescription[] result = DFService.search(this, template);
             if (result.length == 0)
-                return Collections.emptyMap();
+                return;
 
             ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
             req.setConversationId(MessageType.ROLE_QUERY.toString());
@@ -259,7 +263,6 @@ public class GameMasterAgent extends Agent {
             e.printStackTrace();
         }
 
-        return new HashMap<>(playerRoles);
     }
 
     private void broadcastSystem(String text, MessageType type) {

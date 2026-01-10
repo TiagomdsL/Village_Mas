@@ -2,9 +2,7 @@ package agents;
 
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 import model.MessageType;
-import model.Role;
 
 public class VillagerAgent extends AbstractPlayerAgent {
 
