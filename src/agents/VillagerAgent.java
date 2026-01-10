@@ -278,12 +278,18 @@ public class VillagerAgent extends AbstractPlayerAgent {
             for (String acusees : acusations.get(playerName)) {
                 if (super.wasWerewolf.contains(acusees)) {
                     super.updateBelief(playerName, model.Role.SEER, 1); // quase certeza
+                    if(this.myRole != model.Role.WEREWOLF) {
+                        super.updateTrust(playerName, 0.5);
+                    }
                 }
             }
 
             for (String trusteds : trusts.get(playerName)) {
                 if (this.wasProtected.contains(trusteds)) {
                     super.updateBelief(playerName, model.Role.DOCTOR, 1); // quase certeza
+                    if(this.myRole != model.Role.WEREWOLF) {
+                        super.updateTrust(playerName, 0.5);
+                    }
                 }
             }
             // Baseado em trust
@@ -342,6 +348,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
         }
         
         this.currDoctor = (maxDoctor != null) ? maxDoctor : "";
-        this.currSeer = (maxSeer != null) ? maxSeer : "";
+        this.currSeer = (maxSeer != null) ? maxSeer : "";     
     }
 }
+
