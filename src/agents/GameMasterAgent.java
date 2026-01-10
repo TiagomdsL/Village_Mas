@@ -42,6 +42,7 @@ public class GameMasterAgent extends Agent {
     private final Map<String, Role> playerRoles = new HashMap<>();
 
     JSONObject gameState = new JSONObject();
+    private int round = 1;
 
 
     @Override
@@ -80,6 +81,7 @@ public class GameMasterAgent extends Agent {
             broadcastSystem("Init game", MessageType.SYSTEM);
             broadcastWerewolvesPlayers();
             broadcastAlivePlayers();
+            alivePlayersJson();
             return 0;
         }
     }
@@ -96,6 +98,7 @@ public class GameMasterAgent extends Agent {
             super.onStart();
             ticks = 0;
             broadcastSystem("Day phase started.", MessageType.SYSTEM);
+
         }
 
         @Override
@@ -109,6 +112,7 @@ public class GameMasterAgent extends Agent {
 
         @Override
         public int onEnd() {
+            killPlayersJson();
             killPlayers();
             broadcastSystem("Day phase ended.", MessageType.SYSTEM);
             GamePhaseBehaviour fsm = (GamePhaseBehaviour) getParent();
@@ -188,12 +192,15 @@ public class GameMasterAgent extends Agent {
                 }
             }
             toDiePlayers.clear();
+            alivePlayersJson();
+            killPlayersJson();
             killPlayers();
 
             broadcastSystem("Night phase ended.", MessageType.SYSTEM);
             GamePhaseBehaviour fsm = (GamePhaseBehaviour) getParent();
             fsm.registerState(new DayPhaseBehaviour(myAgent, 1000), GamePhase.Day.toString()); // para garantir que o dia seja a próxima fase devido aos tickes após o primeir dia
 
+            round++;
             return isEnded();
         }
     }
@@ -284,7 +291,20 @@ public class GameMasterAgent extends Agent {
     private void broadcastAlivePlayers() {
         String players = String.join(", ", playerRoles.keySet());
         broadcastSystem("Players vivos:" + players, MessageType.ALIVE_PLAYERS);
-        System.out.println(players);
+//        System.out.println(players);
+
+    }
+
+    private void alivePlayersJson() {
+        JSONArray aliveArray = new JSONArray();
+        for (String p : playerRoles.keySet()) {
+            JSONObject playersObj = new JSONObject();
+            playersObj.put(p, playerRoles.get(p).toString());
+            aliveArray.put(playersObj);
+        }
+
+        gameState.put("alive_players" +round, aliveArray);
+        //System.out.println(gameState.toString());
     }
 
     private void broadcastWerewolvesPlayers() {
@@ -331,7 +351,7 @@ public class GameMasterAgent extends Agent {
                     msg.setConversationId(MessageType.KILL_NOTIFICATION.toString()); // se não for, notifica apenas a morte
 
                 send(msg);
-                broadcastSystem("The Player: " + player + " is Dead. " + playerRoles.get(player) , MessageType.SYSTEM);
+                broadcastSystem("The Player: " + player + " is Dead. " + playerRoles.get(player), MessageType.SYSTEM);
                 playerRoles.remove(player);
             }
             deadPlayers.clear();
@@ -341,6 +361,18 @@ public class GameMasterAgent extends Agent {
 
         if (!toKill.isEmpty()) killPlayers(); // recursividade para tratar as mortes causadas pelo hunter
 
+    }
+
+    public void killPlayersJson() {
+        JSONArray deadArray = new JSONArray();
+        for (String p : toKill) {
+            JSONObject playersObj = new JSONObject();
+            playersObj.put(p, playerRoles.get(p).toString());
+            deadArray.put(playersObj);
+
+        }
+        gameState.put("dead_players" + round, deadArray);
+        System.out.println(gameState.toString());
     }
 
     // verificação da condição de fim de jogo
