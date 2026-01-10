@@ -112,7 +112,7 @@ public class GameMasterAgent extends Agent {
 
         @Override
         public int onEnd() {
-            killPlayersJson();
+            killPlayersJson("Votacao");
             killPlayers();
             broadcastSystem("Day phase ended.", MessageType.SYSTEM);
             GamePhaseBehaviour fsm = (GamePhaseBehaviour) getParent();
@@ -193,7 +193,7 @@ public class GameMasterAgent extends Agent {
             }
             toDiePlayers.clear();
             alivePlayersJson();
-            killPlayersJson();
+            killPlayersJson("Noite");
             killPlayers();
 
             broadcastSystem("Night phase ended.", MessageType.SYSTEM);
@@ -363,7 +363,7 @@ public class GameMasterAgent extends Agent {
 
     }
 
-    public void killPlayersJson() {
+    public void killPlayersJson(String fase) {
         JSONArray deadArray = new JSONArray();
         for (String p : toKill) {
             JSONObject playersObj = new JSONObject();
@@ -371,7 +371,7 @@ public class GameMasterAgent extends Agent {
             deadArray.put(playersObj);
 
         }
-        gameState.put("dead_players" + round, deadArray);
+        gameState.put("dead_players" + fase + round, deadArray);
         System.out.println(gameState.toString());
     }
 
