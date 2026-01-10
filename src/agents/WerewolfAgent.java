@@ -73,7 +73,7 @@ public class WerewolfAgent extends VillagerAgent {
         String target = content.trim();
         super.updateTrust(target, 1.0);
         System.out.println(getLocalName() + " recebeu sugestão de ataque para: " + target);
-        handleWerewolfAttack("GameMaster");
+        handleWerewolfAttack(gameMasterAddr);
     }
 
     //Decide quem atacar com 50/50 de perguntar aos outros werewolfs ou escolher o mais confiável, se o target é sugestão ele envia o ataque ao GameMaster
@@ -119,7 +119,7 @@ public class WerewolfAgent extends VillagerAgent {
             ACLMessage vote = new ACLMessage(ACLMessage.INFORM);
             vote.setConversationId(MessageType.VOTE.name());
             vote.setContent(target);
-            vote.addReceiver(new jade.core.AID("GameMaster", jade.core.AID.ISLOCALNAME));
+            vote.addReceiver(new AID(gameMasterAddr, AID.ISLOCALNAME));
             send(vote);
         }
     }

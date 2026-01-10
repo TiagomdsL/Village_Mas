@@ -1,5 +1,6 @@
 package agents;
 
+import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import model.MessageType;
@@ -104,7 +105,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
             ACLMessage vote = new ACLMessage(ACLMessage.INFORM);
             vote.setConversationId(MessageType.VOTE.name());
             vote.setContent(target);
-            vote.addReceiver(new jade.core.AID("GameMaster", jade.core.AID.ISLOCALNAME));
+            vote.addReceiver(new AID(gameMasterAddr, AID.ISLOCALNAME));
             send(vote);
         }
     }

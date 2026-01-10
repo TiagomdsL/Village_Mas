@@ -24,6 +24,7 @@ import java.util.Map;
 public abstract class AbstractPlayerAgent extends Agent {
 
     protected Role myRole;
+    protected String gameMasterAddr;
 
     // P(role | evidence) para cada jogador
     protected Map<String, Map<Role, Double>> beliefs = new HashMap<>();
@@ -76,6 +77,7 @@ public abstract class AbstractPlayerAgent extends Agent {
         System.out.println(getLocalName() + " respondendo role query: " + myRole.name());
         ACLMessage reply = new ACLMessage(ACLMessage.SUBSCRIBE); // subscreve ao gamemaster para participar do jogo, enviando a sua role
         reply.addReceiver(new AID(sender, AID.ISLOCALNAME));
+        gameMasterAddr = sender;
         reply.setConversationId(MessageType.ROLE_QUERY.toString());
         reply.setContent("ROLE:" + myRole.name());
         send(reply);

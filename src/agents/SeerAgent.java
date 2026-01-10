@@ -3,6 +3,7 @@ package agents;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import model.MessageType;
+import model.Role;
 
 public class SeerAgent extends VillagerAgent {
 
@@ -47,11 +48,10 @@ public class SeerAgent extends VillagerAgent {
     private void handleSeerReceive(String content, String sender) {
         if (content == null) return;
         content = content.trim();
-        System.out.println(content);
         if (content.isEmpty()) return;
-        System.out.println("Ent a role deste é " + content);
+//        System.out.println("Ent a role deste é " + content);
 
-        if (content.equals("WEREWOLF")) {
+        if (content.equals(Role.WEREWOLF.name())) {
             super.updateTrust(sender, 0.0);
         } else {
             super.updateTrust(sender, 1.0);
