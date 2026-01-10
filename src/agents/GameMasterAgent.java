@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 /**
  * Game Master:
  * - controla fases
@@ -37,6 +40,8 @@ public class GameMasterAgent extends Agent {
 
     // map de roles obtidos por DF
     private final Map<String, Role> playerRoles = new HashMap<>();
+
+    JSONObject gameState = new JSONObject();
 
 
     @Override
@@ -297,7 +302,6 @@ public class GameMasterAgent extends Agent {
             msg.setConversationId(MessageType.WEREWOLF_PLAYERS.toString());
             send(msg);
         }
-        System.out.println(werewolves);
     }
 
 
