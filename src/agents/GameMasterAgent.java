@@ -328,6 +328,7 @@ public class GameMasterAgent extends Agent {
     // verificação se houve players mortos
     private void killPlayers() {
         if (!protectedPlayers.isEmpty()) {
+            protectedPlayersJson("NIGHT");
             for (String p : protectedPlayers) {
                 broadcastSystem("Player " + p + " was protected by the Doctor.", MessageType.SYSTEM);
                 toKill.remove(p);
@@ -388,6 +389,7 @@ public class GameMasterAgent extends Agent {
             protectedPlayers.add(content);
         } else if (convId.equals(MessageType.HUNTER_KILL.toString())) { // o hunter matou alguém, adicionar à lista de mortos
             System.out.println("Adicionando jogador a lista de mortos pelo hunter: " + content);
+            hunterJson(sender, content);
             toKill.add(content);
         }
     }
@@ -414,6 +416,26 @@ public class GameMasterAgent extends Agent {
         logEvent(phase, "ALIVE_PLAYERS", aliveArray);
     }
 
+    private void protectedPlayersJson(String phase) {
+        JSONArray protectedArray = new JSONArray();
+        for (String p : protectedPlayers) {
+            JSONObject playerObj = new JSONObject();
+            playerObj.put("name", p);
+            playerObj.put("role", playerRoles.get(p).toString());
+            protectedArray.put(playerObj);
+        }
+        logEvent(phase, "PROTECTED_PLAYERS", protectedArray);
+    }
+
+    private void hunterJson(String hunter, String target) {
+        JSONArray hunterArray = new JSONArray();
+        JSONObject actionObj = new JSONObject();
+        actionObj.put("hunter", hunter);
+        actionObj.put("target", target);
+        hunterArray.put(actionObj);
+        logEvent("NIGHT", "HUNTER_KILL", hunterArray);
+    }
+
     private void logEvent(String phase, String type, JSONArray data) {
         JSONObject event = new JSONObject();
         event.put("round", round);
@@ -427,6 +449,8 @@ public class GameMasterAgent extends Agent {
 
         System.out.println(event.toString());
     }
+
+
 
     private void saveGameStateToFile() {
         try {
