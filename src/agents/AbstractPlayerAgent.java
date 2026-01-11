@@ -62,13 +62,12 @@ public abstract class AbstractPlayerAgent extends Agent {
 
                 MessageType type = null;
                 try {
-                    type = MessageType.valueOf(msg.getConversationId());
+                    type = MessageType.valueOf(msg.getConversationId()); // listener
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 if (type == null) return;
                 processMessage(type, msg.getContent(), msg.getSender().getLocalName());
-
 
             }
         });
@@ -87,9 +86,9 @@ public abstract class AbstractPlayerAgent extends Agent {
     protected void initBeliefs(String[] players) {
         for (String p : players) {
             Map<Role, Double> probs = new HashMap<>();
-            for (Role r : Role.values()) {
+            for (Role r : Role.values())
                 probs.put(r, 1.0 / Role.values().length);
-            }
+
             beliefs.put(p, probs);
             trust.put(p, 0.5); // neutro
         }
@@ -105,18 +104,14 @@ public abstract class AbstractPlayerAgent extends Agent {
         probs.put(role, prob);
         // normalizar
         double total = 0.0;
-        for (double p : probs.values()) {
+        for (double p : probs.values())
             total += p;
-        }
-        for (Role r : probs.keySet()) {
+        for (Role r : probs.keySet())
             probs.put(r, probs.get(r) / total);
-        }
     }
 
     protected void checkAlivePlayers(String content) {
-        if (!content.startsWith("Players vivos:")) {
-            return;
-        }
+        if (!content.startsWith("Players vivos:")) return;
 
         String playersStr = content.replace("Players vivos:", "").trim();
 
@@ -124,13 +119,11 @@ public abstract class AbstractPlayerAgent extends Agent {
             String[] players = playersStr.split("\\s*,\\s*");
             initBeliefs(players);
         }
-
-//        System.out.println(getLocalName() + "Alive players updated: " + trust);
-
     }
 
 
-    protected void processMessage(MessageType messageType, String content, String sender) { //temporario para n dar erro
+    // Gere as mensagens recebidas
+    protected void processMessage(MessageType messageType, String content, String sender) {
         switch (messageType) {
             case ACCUSATION:
                 handleAccusation(content, sender);
@@ -165,6 +158,7 @@ public abstract class AbstractPlayerAgent extends Agent {
         }
     }
 
+    // da a role quando o seer o observa (recebe uma mensagem deste)
     private void detectedBySeer(String sender) {
         ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
         reply.addReceiver(new AID(sender, AID.ISLOCALNAME));
@@ -173,12 +167,6 @@ public abstract class AbstractPlayerAgent extends Agent {
         reply.setContent(myRole.name());
         send(reply);
     }
-
-    protected abstract void handleAccusation(String content, String sender); // Processar acusação
-
-    protected abstract void handleRoleClaim(String content, String sender); // Processar revelação de papel
-
-    protected abstract void handleVote(String content, String sender);      // Processar voto
 
     protected void handleSystem(String content) {
         if (content.contains("is Dead")) {
@@ -191,7 +179,7 @@ public abstract class AbstractPlayerAgent extends Agent {
                 String deadPlayerStr = deadPlayer[0].trim();
                 String roleStr = deadPlayer[1].trim();
 
-                // remover o player morto das listas de confiança
+                // remove o player morto das listas de confiança
                 trust.remove(deadPlayerStr);
                 beliefs.remove(deadPlayerStr);
 
@@ -206,9 +194,6 @@ public abstract class AbstractPlayerAgent extends Agent {
                     }
                 }
 
-//                System.out.println(getLocalName() + " removed dead player from trust/beliefs: " + deadPlayer + " bc is dead.");
-
-
             } catch (Exception e) {
                 System.err.println(getLocalName() + " failed to parse death message: " + content);
             }
@@ -216,8 +201,9 @@ public abstract class AbstractPlayerAgent extends Agent {
 
     }    // Processar mensagem do sistema
 
-    protected abstract void handleTrust(String content, String sender);     // Processar confiança
-
+    protected abstract void handleAccusation(String content, String sender); // Processa acusação
+    protected abstract void handleRoleClaim(String content, String sender); // Processa revelação de papel
+    protected abstract void handleVote(String content, String sender);      // Processa voto
+    protected abstract void handleTrust(String content, String sender);     // Processa confiança
     protected abstract void decideAction();
-
 }

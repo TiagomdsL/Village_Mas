@@ -96,6 +96,8 @@ public class GameMasterAgent extends Agent {
         private int ticks = 0;
         private boolean votingStarted = true;
 
+        private ACLMessage msg;
+
         public DayPhaseBehaviour(Agent a, long period) {
             super(a, period);
         }
@@ -116,7 +118,6 @@ public class GameMasterAgent extends Agent {
                     broadcastSystem("Start Voting", MessageType.VOTE);
                     votingStarted = false;
                 }
-                ACLMessage msg = receive();
                 while ((msg = receive()) != null) {
                     String sender = msg.getSender().getLocalName();
                     String content = msg.getContent();
@@ -189,9 +190,8 @@ public class GameMasterAgent extends Agent {
                 String convId = msg.getConversationId();
                 mensage_type(convId, sender, content);
             }
-            if (ticks >= 5) {
-                stop();
-            }
+            if (ticks >= 5) stop();
+
         }
 
         @Override
@@ -214,13 +214,13 @@ public class GameMasterAgent extends Agent {
             System.out.println(gameState.toString(2));
             saveGameStateToFile();
 
-            for (Role role : playerRoles.values()) {
+            for (Role role : playerRoles.values())
                 if (role == Role.WEREWOLF) {
                     broadcastSystem("Game ended, vitoria dos lobisomens.", MessageType.SYSTEM);
                     myAgent.doDelete();
                     return;
                 }
-            }
+
             broadcastSystem("Game ended, vitoria dos aldeões.", MessageType.SYSTEM);
             myAgent.doDelete();
         }
@@ -245,15 +245,13 @@ public class GameMasterAgent extends Agent {
 
         try {
             DFAgentDescription[] result = DFService.search(this, template);
-            if (result.length == 0)
-                return;
+            if (result.length == 0) return;
 
             ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
             req.setConversationId(MessageType.ROLE_QUERY.toString());
             req.setContent("ROLE_REQUEST");
-            for (DFAgentDescription dfd : result) {
+            for (DFAgentDescription dfd : result)
                 req.addReceiver(dfd.getName());
-            }
             send(req);
 
             long deadline = System.currentTimeMillis() + timeoutMs;
@@ -264,8 +262,8 @@ public class GameMasterAgent extends Agent {
             while (System.currentTimeMillis() < deadline) {
                 long wait = deadline - System.currentTimeMillis();
                 ACLMessage reply = blockingReceive(mt, wait); // gamemaster recolhe as subscrições para participar do jogo
-                if (reply == null)
-                    break;
+                if (reply == null) break;
+
                 String sender = reply.getSender().getLocalName();
                 String content = reply.getContent();
                 if (content != null && content.startsWith("ROLE:")) {
@@ -297,16 +295,13 @@ public class GameMasterAgent extends Agent {
     private void broadcastAlivePlayers() {
         String players = String.join(", ", playerRoles.keySet());
         broadcastSystem("Players vivos:" + players, MessageType.ALIVE_PLAYERS);
-//        System.out.println(players);
-
     }
 
     private void broadcastWerewolvesPlayers() {
         for (String p : playerRoles.keySet()) {
             Role r = playerRoles.get(p);
-            if (r == Role.WEREWOLF) {
+            if (r == Role.WEREWOLF)
                 werewolvesPlayers.add(p);
-            }
         }
         String werewolves = String.join(", ", werewolvesPlayers);
         for (String p : werewolvesPlayers) {
@@ -351,9 +346,9 @@ public class GameMasterAgent extends Agent {
                 playerRoles.remove(player);
             }
             deadPlayers.clear();
-        } else {
+        } else
             broadcastSystem("No one died this round.", MessageType.SYSTEM);
-        }
+
 
         if (!toKill.isEmpty()) killPlayers(); // recursividade para tratar as mortes causadas pelo hunter
     }
@@ -364,16 +359,13 @@ public class GameMasterAgent extends Agent {
             String mostVotedPlayer = null;
             int maxVotes = -1;
 
-            for (Map.Entry<String, Integer> entry : toDiePlayers.entrySet()) {
+            for (Map.Entry<String, Integer> entry : toDiePlayers.entrySet())
                 if (entry.getValue() > maxVotes) {
                     maxVotes = entry.getValue();
                     mostVotedPlayer = entry.getKey();
                 }
-            }
-
-            if (mostVotedPlayer != null) {
+            if (mostVotedPlayer != null)
                 toKill.add(mostVotedPlayer);
-            }
         }
         toDiePlayers.clear();
         killPlayersJson(phase);
@@ -386,34 +378,25 @@ public class GameMasterAgent extends Agent {
         int werewolves = 0, villagers = 0;
 
         for (Role role : playerRoles.values()) {
-            if (role == Role.WEREWOLF) {
+            if (role == Role.WEREWOLF)
                 werewolves++;
-            } else  {
-                villagers++;
-            }
+            else villagers++;
         }
-
         return (werewolves == 0 || villagers <= werewolves) ? 1 : 0;
     }
 
     private void mensage_type(String convId, String sender, String content) {
-        if (convId.equals(MessageType.WEREWOLF_ATTACK.toString())) {
+        if (convId.equals(MessageType.WEREWOLF_ATTACK.toString()))
             toDiePlayers.put(content, toDiePlayers.getOrDefault(content, 0) + 1); // votação de quem morrer dos werewolfes
-
-        } else if (convId.equals(MessageType.DOCTOR_PROTECT.toString())) {
+        else if (convId.equals(MessageType.DOCTOR_PROTECT.toString()))
             protectedPlayers.add(content);
-
-        } else if (convId.equals(MessageType.HUNTER_KILL.toString())) { // o hunter matou alguém quando foi morto
-//            System.out.println("Adicionando jogador a lista de mortos pelo hunter: " + content);
+        else if (convId.equals(MessageType.HUNTER_KILL.toString())) { // o hunter matou alguém quando foi morto
             hunterJson(sender, content);
             toKill.add(content);
-
-        } else if (convId.equals(MessageType.VOTE.toString())) {
+        } else if (convId.equals(MessageType.VOTE.toString()))
             toDiePlayers.put(content, toDiePlayers.getOrDefault(content, 0) + 1); // votação de quem morrer dos villagers
-//            System.out.println("Voto recebido de " + sender + " para " + content);
-        } else if (convId.equals(MessageType.SEER_REVEAL.toString())){ // seer indica a role de alguém
+        else if (convId.equals(MessageType.SEER_REVEAL.toString())) // seer indica a role de alguém
             seerJson(sender, content); //serve so para o log
-        }
     }
 
     private void seerJson(String sender, String content) {
@@ -474,14 +457,10 @@ public class GameMasterAgent extends Agent {
         event.put("phase", phase);
         event.put("type", type);
         event.put("data", data);
-
         eventLog.put(event);
-
         gameState.put("events", eventLog);
-
         System.out.println(event.toString());
     }
-
 
 
     private void saveGameStateToFile() {
@@ -496,6 +475,4 @@ public class GameMasterAgent extends Agent {
             e.printStackTrace();
         }
     }
-
-
 }

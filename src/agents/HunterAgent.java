@@ -17,12 +17,13 @@ public class HunterAgent extends VillagerAgent {
 
     protected void processMessage(MessageType messageType, String content, String sender) { //temporario para n dar erro
         super.processMessage(messageType, content, sender);
-        if (messageType == MessageType.HUNTER_KILL) {
+        if (messageType == MessageType.HUNTER_KILL) { // antes de morrer, ele mata alguém
             handleHunter(sender);
             doDelete();
         }
     }
 
+    // mata o agente que menos confia
     private void handleHunter(String sender) {
         String target = null;
         double minTrust = Double.POSITIVE_INFINITY;
@@ -49,17 +50,13 @@ public class HunterAgent extends VillagerAgent {
         Random random = new Random();
         double decision = random.nextDouble();
         String role = "Hunter";
-        if (decision < 0.4) {
-            role = "WEREWOLF"; // jogada arriscada os werewolfs não o focam mas os aldeões podem expulsá-lo 
-        }else if (decision < 0.5) {
-            role = "VILLAGER";
-        } else  if (decision < 0.6) {
-            role = "DOCTOR";
-        } else  if (decision < 0.7) {
-            role = "SEER";
-        } else  if (decision < 1) {
-            role = "HUNTER";  // hunter é seguro pois ninguem o quer atacar
-        }
+        if (decision < 0.4)
+            role = "WEREWOLF"; // jogada arriscada os werewolfs não o focam mas os aldeões podem expulsá-lo
+        else if (decision < 0.5) role = "VILLAGER";
+        else if (decision < 0.6) role = "DOCTOR";
+        else if (decision < 0.7) role = "SEER";
+        else if (decision < 1) role = "HUNTER";  // hunter é seguro pois ninguem o quer atacar
+
         return role;
     }
 }

@@ -27,25 +27,23 @@ public class VillagerAgent extends AbstractPlayerAgent {
         Random random = new Random();
         content = content.trim();
         String[] parts = content.split(" ", 2);
-        if (parts.length < 2) {
-            return; // Formato inválido
-        }
+        if (parts.length < 2) return; // Formato inválido
+
         String accusedAgent = parts[0];
-        if (!acusations.containsKey(sender)) {
-            acusations.put(sender, new ArrayList<>());
-        }
+        if (!acusations.containsKey(sender)) acusations.put(sender, new ArrayList<>());
+
         acusations.get(sender).add(accusedAgent);
         String reason = parts[1]; // por enquanto n tem uso
         double senderTrust = super.trust.get(sender);
         double accusedTrust = super.trust.get(accusedAgent);
 
-        if (senderTrust > 0.5 && accusedTrust >= 0.5) {
-            super.updateTrust(accusedAgent, -0.1);//se o acusador é confiável e o acusado também
-        } else if (senderTrust > 0.5) {
-            super.updateTrust(accusedAgent, -0.2);//se o acusador é confiável e o acusado não é
-        } else if (accusedTrust >= 0.5) {
-            super.updateTrust(sender, -0.2);//se o acusador não é confiável e o acusado é
-        } else {
+        if (senderTrust > 0.5 && accusedTrust >= 0.5)
+            super.updateTrust(accusedAgent, -0.1);  //se o acusador é confiável e o acusado também
+        else if (senderTrust > 0.5)
+            super.updateTrust(accusedAgent, -0.2);  //se o acusador é confiável e o acusado não é
+        else if (accusedTrust >= 0.5)
+            super.updateTrust(sender, -0.2);    //se o acusador não é confiável e o acusado é
+        else {
             double deceptionChance = random.nextDouble(-0.2, 0.1);
             super.updateTrust(accusedAgent, deceptionChance); // se o acusador e o acusado não são confiáveis
             deceptionChance = random.nextDouble(-0.2, 0.1);
@@ -57,22 +55,21 @@ public class VillagerAgent extends AbstractPlayerAgent {
         Random random = new Random();
         content = content.trim();
         String[] parts = content.split(" ", 2);
-        if (parts.length < 2) {
-            return; // Formato inválido
-        }
+        if (parts.length < 2) return; // Formato inválido
+
         String trustedAgent = parts[0];
-        if (!trusts.containsKey(sender)) {
-            trusts.put(sender, new ArrayList<>());
-        }
+        if (!trusts.containsKey(sender)) trusts.put(sender, new ArrayList<>());
+
         trusts.get(sender).add(trustedAgent);
         String reason = parts[1]; // por enquanto n tem uso
         double senderTrust = super.trust.get(sender);
         double trustedTrust = super.trust.get(trustedAgent);
-        if (senderTrust > 0.5 && trustedTrust < 0.5) {
+
+        if (senderTrust > 0.5 && trustedTrust < 0.5)
             super.updateTrust(trustedAgent, 0.15);
-        } else if (senderTrust > 0.5) {
+        else if (senderTrust > 0.5)
             super.updateTrust(trustedAgent, 0.3);
-        } else {
+        else {
             double deceptionChance = random.nextDouble(-0.2, 0.1);
             super.updateTrust(trustedAgent, deceptionChance);
         }
@@ -82,50 +79,51 @@ public class VillagerAgent extends AbstractPlayerAgent {
         Random random = new Random();
         content = content.trim();
         String[] parts = content.split(" ", 2);
-        if (parts.length < 2) {
-            return; // Formato inválido
-        }
+        if (parts.length < 2) return; // Formato inválido
+
         String Role = parts[0];
         String reason = parts[1]; // por enquanto n tem uso
         double senderTrust = super.trust.get(sender);
-        if (Role.equals("DOCTOR")) {
-            if (senderTrust > 0.5) {
-                super.updateTrust(sender, 0.4); // se o confiador é confiável 
-            } else if (senderTrust == 0.5) {
-                double deceptionChance = random.nextDouble(-0.3, 0.3);
-                super.updateTrust(sender, deceptionChance); // se o confiador não é confiável 
-            } else {
-                super.updateTrust(sender, -0.3); // se o confiador é suspeito
+        switch (Role) {
+            case "DOCTOR" -> {
+                if (senderTrust > 0.5)
+                    super.updateTrust(sender, 0.4); // se o confiador é confiável
+                else if (senderTrust == 0.5) {
+                    double deceptionChance = random.nextDouble(-0.3, 0.3);
+                    super.updateTrust(sender, deceptionChance); // se o confiador não é confiável
+                } else
+                    super.updateTrust(sender, -0.3); // se o confiador é suspeito
             }
-        } else if (Role.equals("VILLAGER")) {
-            if (senderTrust > 0.5) {
-                super.updateTrust(sender, 0.2); // se o confiador é confiável 
-            } else if (senderTrust == 0.5) {
-                double deceptionChance = random.nextDouble(-0.1, 0.1);
-                super.updateTrust(sender, deceptionChance); // se o confiador não é confiável 
-            } else {
-                super.updateTrust(sender, -0.1); // se o confiador é suspeito
+            case "VILLAGER" -> {
+                if (senderTrust > 0.5)
+                    super.updateTrust(sender, 0.2); // se o confiador é confiável
+                else if (senderTrust == 0.5) {
+                    double deceptionChance = random.nextDouble(-0.1, 0.1);
+                    super.updateTrust(sender, deceptionChance); // se o confiador não é confiável
+                } else
+                    super.updateTrust(sender, -0.1); // se o confiador é suspeito
             }
-        } else if (Role.equals("SEER")) {
-            if (senderTrust > 0.5) {
-                super.updateTrust(sender, 0.5); // se o confiador é confiável 
-            } else if (senderTrust == 0.5) {
-                double deceptionChance = random.nextDouble(-0.2, 0.4);
-                super.updateTrust(sender, deceptionChance); // se o confiador não é confiável // se o confiador não é confiável 
-            } else {
-                super.updateTrust(sender, -0.3); // se o confiador é suspeito
+            case "SEER" -> {
+                if (senderTrust > 0.5)
+                    super.updateTrust(sender, 0.5); // se o confiador é confiável
+                else if (senderTrust == 0.5) {
+                    double deceptionChance = random.nextDouble(-0.2, 0.4);
+                    super.updateTrust(sender, deceptionChance); // se o confiador não é confiável // se o confiador não é confiável
+                } else
+                    super.updateTrust(sender, -0.3); // se o confiador é suspeito
             }
-        } else if (Role.equals("WEREWOLF")) {
-            double deceptionChance = random.nextDouble(-1.0, 0.4);
-            super.updateTrust(sender, deceptionChance); // qualquer um que diga que é lobisomem é suspeito, mas pode ser uma mentira para despistar
-        } else if (Role.equals("HUNTER")) {
-            if (senderTrust > 0.5) {
-                super.updateTrust(sender, 0.5); // se o confiador é confiável e tem medo do hunter lhe focar
-            } else if (senderTrust == 0.5) {
-                double deceptionChance = random.nextDouble(-0.2, 0.3);
-                super.updateTrust(sender, deceptionChance); // se o confiador não é confiável
-            } else {
-                super.updateTrust(sender, -0.3); // se o confiador é suspeito
+            case "WEREWOLF" -> {
+                double deceptionChance = random.nextDouble(-1.0, 0.4);
+                super.updateTrust(sender, deceptionChance); // qualquer um que diga que é lobisomem é suspeito, mas pode ser uma mentira para despistar
+            }
+            case "HUNTER" -> {
+                if (senderTrust > 0.5)
+                    super.updateTrust(sender, 0.5); // se o confiador é confiável e tem medo do hunter lhe focar
+                else if (senderTrust == 0.5) {
+                    double deceptionChance = random.nextDouble(-0.2, 0.3);
+                    super.updateTrust(sender, deceptionChance); // se o confiador não é confiável
+                } else
+                    super.updateTrust(sender, -0.3); // se o confiador é suspeito
             }
         }
     }
@@ -150,9 +148,9 @@ public class VillagerAgent extends AbstractPlayerAgent {
         }
     }
 
+    // escolhe o agente com menor trust (exclui a si próprio) e envia o voto ao GameMaster
     @Override
     protected void decideAction() {
-        // escolhe o agente com menor trust (exclui a si próprio) e envia VOTE ao GameMaster
         String target = null;
         double minTrust = Double.POSITIVE_INFINITY;
         for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
@@ -175,35 +173,24 @@ public class VillagerAgent extends AbstractPlayerAgent {
 
     // 30% de chance de acusar alguém, 20% de chance de revelar o seu papel, 20% de chance de dizer em quem confia mais, 30% de ficar calado
     protected void discuss() {
-        if (currWerewolf != null && !currWerewolf.isEmpty()) {
+        if (currWerewolf != null && !currWerewolf.isEmpty())
             acuse(currWerewolf);
-            return;
-        }
-        else if (currSeer != null && !currSeer.isEmpty()) {
+        else if (currSeer != null && !currSeer.isEmpty())
             trust(currSeer);
-            return;
-        }
-        else if (currDoctor != null && !currDoctor.isEmpty()) {
+        else if (currDoctor != null && !currDoctor.isEmpty())
             trust(currDoctor);
-            return;
-        }
-        else { 
+        else {
             Random random = new Random();
             double decision = random.nextDouble();
-            if (decision < 0.3) {
-                acuse();
-            } else if (decision < 0.5) {
-                revealRole();
-            } else if (decision < 0.7) {
-                trustSomeone();
-            } else{
-                // remain silent
-            }
+
+            if (decision < 0.3) acuse();
+            else if (decision < 0.5) revealRole();
+            else if (decision < 0.7) trustSomeone();
         }
     }
 
     //diz em quem confia mais
-    protected void trustSomeone() { 
+    protected void trustSomeone() {
         String target = null;
         double maxTrust = Double.NEGATIVE_INFINITY;
         for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
@@ -219,10 +206,9 @@ public class VillagerAgent extends AbstractPlayerAgent {
             ACLMessage trustMsg = new ACLMessage(ACLMessage.INFORM);
             trustMsg.setConversationId(MessageType.TRUST.name());
             trustMsg.setContent(target + " is trustworthy");
-            for (String p : super.trust.keySet()) {
+            for (String p : super.trust.keySet())
                 if (!p.equals(getLocalName()))
                     trustMsg.addReceiver(new AID(p, AID.ISLOCALNAME));
-            }
             send(trustMsg);
         }
     }
@@ -240,20 +226,16 @@ public class VillagerAgent extends AbstractPlayerAgent {
                 target = name;
             }
         }
-        if (target != null) {
-            acuse(target); // modularização da função
-        }
+        if (target != null) acuse(target); // modularização da função
     }
 
     protected void acuse(String target) {
         ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
         msg.setConversationId(MessageType.ACCUSATION.name());
         msg.setContent(target);
-        for (String player : super.trust.keySet()) {
-            if (!player.equals(getLocalName())) {
+        for (String player : super.trust.keySet())
+            if (!player.equals(getLocalName()))
                 msg.addReceiver(new AID(player, AID.ISLOCALNAME));
-            }
-        }
         send(msg);
     }
 
@@ -261,11 +243,9 @@ public class VillagerAgent extends AbstractPlayerAgent {
         ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
         msg.setConversationId(MessageType.TRUST.name());
         msg.setContent(target);
-        for (String player : super.trust.keySet()) {
-            if (!player.equals(getLocalName())) {
+        for (String player : super.trust.keySet())
+            if (!player.equals(getLocalName()))
                 msg.addReceiver(new AID(player, AID.ISLOCALNAME));
-            }
-        }
         send(msg);
     }
 
@@ -275,11 +255,9 @@ public class VillagerAgent extends AbstractPlayerAgent {
         ACLMessage roleClaim = new ACLMessage(ACLMessage.INFORM);
         roleClaim.setConversationId(MessageType.ROLE_CLAIM.name());
         roleClaim.setContent(role + " Revealing role");
-        for (String p : super.trust.keySet()) {
-            if (!p.equals(getLocalName())) {
+        for (String p : super.trust.keySet())
+            if (!p.equals(getLocalName()))
                 roleClaim.addReceiver(new AID(p, AID.ISLOCALNAME));
-            }
-        }
         send(roleClaim);
     }
 
@@ -287,17 +265,13 @@ public class VillagerAgent extends AbstractPlayerAgent {
         Random random = new Random();
         double decision = random.nextDouble();
         String role = "VILLAGER";
-        if (decision < 0.05) {
-            role = "WEREWOLF"; // mentira
-        }else if (decision < 0.6) {
-            role = "VILLAGER";
-        } else  if (decision < 0.7) {
-            role = "DOCTOR";
-        } else  if (decision < 0.8) {
-            role = "SEER";
-        } else  if (decision < 0.9) {
-            role = "HUNTER";
-        }
+
+        if (decision < 0.05) role = "WEREWOLF"; // mentira
+        else if (decision < 0.6) role = "VILLAGER";
+        else if (decision < 0.7) role = "DOCTOR";
+        else if (decision < 0.8) role = "SEER";
+        else if (decision < 0.9) role = "HUNTER";
+
         return role;
     }
 
@@ -308,31 +282,28 @@ public class VillagerAgent extends AbstractPlayerAgent {
 
             // Pular a si próprio
             if (playerName.equals(getLocalName())) continue;
-            
+
             double trustLevel = super.trust.getOrDefault(playerName, 0.5);
-               
+
             // Se foi identificado como werewolf antes
-            if( acusations.containsKey(playerName)) {
-                for (String acusees : acusations.get(playerName)) {
+            if (acusations.containsKey(playerName))
+                for (String acusees : acusations.get(playerName))
                     if (super.wasWerewolf.contains(acusees)) {
                         super.updateBelief(playerName, model.Role.SEER, 1); // quase certeza
-                        if(this.myRole != model.Role.WEREWOLF) {
+                        if (this.myRole != model.Role.WEREWOLF) {
                             super.updateTrust(playerName, 0.5);
                         }
                     }
-                }
-            }
 
-            if (trusts.containsKey(playerName)) {
-                for (String trusteds : trusts.get(playerName)) {
+            if (trusts.containsKey(playerName))
+                for (String trusteds : trusts.get(playerName))
                     if (this.wasProtected.contains(trusteds)) {
                         super.updateBelief(playerName, model.Role.DOCTOR, 1); // quase certeza
-                        if(this.myRole != model.Role.WEREWOLF) {
+                        if (this.myRole != model.Role.WEREWOLF) {
                             super.updateTrust(playerName, 0.5);
                         }
                     }
-                }
-            }
+
             // Baseado em trust
             if (trustLevel > 0.7 && this.myRole != model.Role.WEREWOLF) {
                 // Alta confiança: mais provável ser DOCTOR, SEER ou VILLAGER
@@ -346,22 +317,21 @@ public class VillagerAgent extends AbstractPlayerAgent {
                 super.updateBelief(playerName, model.Role.VILLAGER, roleProbs.get(model.Role.HUNTER) + 0.10);
                 super.updateBelief(playerName, model.Role.DOCTOR, roleProbs.get(model.Role.DOCTOR) - 0.10);
                 super.updateBelief(playerName, model.Role.SEER, roleProbs.get(model.Role.SEER) - 0.10);
-            }
-            else if(this.myRole != model.Role.WEREWOLF) {
+            } else if (this.myRole != model.Role.WEREWOLF) {
                 // Confiança média: ligeira inclinação para VILLAGER
                 super.updateBelief(playerName, model.Role.VILLAGER, roleProbs.get(model.Role.VILLAGER) + 0.05);
                 super.updateBelief(playerName, model.Role.WEREWOLF, roleProbs.get(model.Role.WEREWOLF) - 0.05);
             }
-            
+
             // Se confia e foi mencionado como confiável em trusts
             if (trusts.containsValue(playerName) && trustLevel > 0.5 && this.myRole != model.Role.WEREWOLF) {
                 super.updateBelief(playerName, model.Role.VILLAGER, roleProbs.get(model.Role.VILLAGER) + 0.05);
             }
-            if(this.myRole == model.Role.WEREWOLF){
+            if (this.myRole == model.Role.WEREWOLF) {
                 super.updateBelief(playerName, model.Role.VILLAGER, roleProbs.get(model.Role.VILLAGER) + 0.10);
             }
         }
-        
+
         // Identifica o jogador com maior probabilidade de ser DOCTOR e SEER
         String maxDoctor = null;
         double maxDoctorProb = 0.0;
@@ -369,22 +339,22 @@ public class VillagerAgent extends AbstractPlayerAgent {
         double maxSeerProb = 0.0;
         String maxWerewolf = null;
         double maxWerewolfProb = 0.0;
-        
+
         for (java.util.Map.Entry<String, java.util.Map<model.Role, Double>> entry : super.beliefs.entrySet()) {
             String playerName = entry.getKey();
             java.util.Map<model.Role, Double> roleProbs = entry.getValue();
-            
+
             if (playerName.equals(getLocalName())) continue;
-            
+
             double doctorProb = roleProbs.get(model.Role.DOCTOR);
             double seerProb = roleProbs.get(model.Role.SEER);
             double werewolfProb = roleProbs.get(model.Role.WEREWOLF);
-            
+
             if (doctorProb > maxDoctorProb) {
                 maxDoctorProb = doctorProb;
                 maxDoctor = playerName;
             }
-            
+
             if (seerProb > maxSeerProb) {
                 maxSeerProb = seerProb;
                 maxSeer = playerName;
@@ -397,8 +367,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
         }
 
         this.currDoctor = (maxDoctor != null && maxDoctorProb > 0.7) ? maxDoctor : "";
-        this.currSeer = (maxSeer != null && maxSeerProb > 0.7) ? maxSeer : ""; 
-        this.currWerewolf = (maxWerewolf != null && maxWerewolfProb > 0.7) ? maxWerewolf : "";    
+        this.currSeer = (maxSeer != null && maxSeerProb > 0.7) ? maxSeer : "";
+        this.currWerewolf = (maxWerewolf != null && maxWerewolfProb > 0.7) ? maxWerewolf : "";
     }
 }
-

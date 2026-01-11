@@ -17,9 +17,8 @@ public class DoctorAgent extends VillagerAgent {
 
     protected void processMessage(MessageType messageType, String content, String sender) { //temporario para n dar erro
         super.processMessage(messageType, content, sender);
-        if (messageType == MessageType.DOCTOR_PROTECT) {
+        if (messageType == MessageType.DOCTOR_PROTECT)
             handleDoctor(sender);
-        }
     }
 
 
@@ -29,22 +28,21 @@ public class DoctorAgent extends VillagerAgent {
         for (Map.Entry<String, Double> entry : super.trust.entrySet()) {
             String agent = entry.getKey();
             double trustValue = entry.getValue();
-            if (!agent.equals(getLocalName()) && trustValue > 0.5) {
+            if (!agent.equals(getLocalName()) && trustValue > 0.5)
                 candidates.add(agent);
-            }
+
         }
 
         if (candidates.isEmpty()) {
             // fallback: escolhe qualquer outro agente ao acaso (mesmo que trust <= 0.5)
             java.util.List<String> allOthers = new java.util.ArrayList<>();
-            for (String a : super.trust.keySet()) {
-                if (!a.equals(getLocalName())) {
+            for (String a : super.trust.keySet())
+                if (!a.equals(getLocalName()))
                     allOthers.add(a);
-                }
-            }
-            if (allOthers.isEmpty()) {
+
+            if (allOthers.isEmpty())
                 protectedAgent = null;
-            } else {
+            else {
                 int idx = java.util.concurrent.ThreadLocalRandom.current().nextInt(allOthers.size());
                 protectedAgent = allOthers.get(idx);
             }
@@ -68,17 +66,13 @@ public class DoctorAgent extends VillagerAgent {
         Random random = new Random();
         double decision = random.nextDouble();
         String role = "Doctor";
-        if (decision < 0.1) {
-            role = "WEREWOLF"; // jogada arriscada os werewolfs não o focam mas os aldeões podem expulsá-lo 
-        }else if (decision < 0.7) {
-            role = "VILLAGER";
-        } else  if (decision < 0.8) {
-            role = "DOCTOR";      // doctor n se quer revelar pois n é seguro 
-        } else  if (decision < 0.9) {
-            role = "SEER";
-        } else  if (decision < 1) {
-            role = "HUNTER";
-        }
+        if (decision < 0.1)
+            role = "WEREWOLF";  // jogada arriscada os werewolfs não o focam mas os aldeões podem expulsá-lo
+        else if (decision < 0.7) role = "VILLAGER";
+        else if (decision < 0.8) role = "DOCTOR";   // doctor n se quer revelar pois n é seguro
+        else if (decision < 0.9) role = "SEER";
+        else role = "HUNTER";
+
         return role;
     }
 }
