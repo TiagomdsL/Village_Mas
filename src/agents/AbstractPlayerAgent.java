@@ -30,7 +30,8 @@ public abstract class AbstractPlayerAgent extends Agent {
     // Métrica de confiança [0,1]
     protected Map<String, Double> trust = new HashMap<>();
 
-    protected List<String> wasWerewolf = new java.util.ArrayList<>(); 
+    // Lista de mortos que já foram revelados como lobisomens
+    protected List<String> wasWerewolf = new java.util.ArrayList<>();
 
 
     @Override
@@ -74,7 +75,7 @@ public abstract class AbstractPlayerAgent extends Agent {
     }
 
     protected void respondToRoleQuery(String sender) {
-        System.out.println(getLocalName() + " respondendo role query: " + myRole.name());
+//        System.out.println(getLocalName() + " respondendo role query: " + myRole.name());
         ACLMessage reply = new ACLMessage(ACLMessage.SUBSCRIBE); // subscreve ao gamemaster para participar do jogo, enviando a sua role
         reply.addReceiver(new AID(sender, AID.ISLOCALNAME));
         gameMasterAddr = sender;

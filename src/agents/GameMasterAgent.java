@@ -56,7 +56,7 @@ public class GameMasterAgent extends Agent {
             registerState(new NightPhaseBehaviour(myAgent, 1000), GamePhase.NIGHT.toString());
             registerLastState(new EndedBehaviour(), GamePhase.ENDED.toString());
 
-            registerTransition(GamePhase.SETUP.toString(), GamePhase.Day.toString(), 0);
+            registerTransition(GamePhase.SETUP.toString(), GamePhase.NIGHT.toString(), 0);
 
             registerTransition(GamePhase.Day.toString(), GamePhase.NIGHT.toString(), 0);
             registerTransition(GamePhase.Day.toString(), GamePhase.ENDED.toString(), 1);
@@ -86,6 +86,7 @@ public class GameMasterAgent extends Agent {
 
     private class DayPhaseBehaviour extends TickerBehaviour {
         private int ticks = 0;
+        private boolean votingStarted = true;
 
         public DayPhaseBehaviour(Agent a, long period) {
             super(a, period);
@@ -102,9 +103,21 @@ public class GameMasterAgent extends Agent {
         public void onTick() {
             //tempo para discutirem
             ticks++;
-            if (ticks >= 2) {
-                broadcastSystem("Start Voting", MessageType.VOTE);
-            }else if (ticks >= 4) {
+            if (ticks >= 2 && ticks < 5) {
+                if (votingStarted) {
+                    broadcastSystem("Start Voting", MessageType.VOTE);
+                    votingStarted = false;
+                }
+
+                ACLMessage msg = receive();
+                if (msg != null) {
+                    String sender = msg.getSender().getLocalName();
+                    String content = msg.getContent();
+                    String convId = msg.getConversationId();
+                    mensage_type(convId, sender, content); //TODO modificar o metodo para aceitar os votos
+                }
+            } else if (ticks >= 5) {
+                votingStarted = true;
                 stop();
             }
         }
@@ -333,7 +346,7 @@ public class GameMasterAgent extends Agent {
                     msg.setConversationId(MessageType.KILL_NOTIFICATION.toString()); // se não for, notifica apenas a morte
 
                 send(msg);
-                broadcastSystem("The Player: " + player + " is Dead. " + playerRoles.get(player) , MessageType.SYSTEM);
+                broadcastSystem("The Player: " + player + " is Dead. " + playerRoles.get(player), MessageType.SYSTEM);
                 playerRoles.remove(player);
             }
             deadPlayers.clear();
@@ -368,6 +381,8 @@ public class GameMasterAgent extends Agent {
         } else if (convId.equals(MessageType.HUNTER_KILL.toString())) { // o hunter matou alguém, adicionar à lista de mortos
             System.out.println("Adicionando jogador a lista de mortos pelo hunter: " + content);
             toKill.add(content);
+        } else if (convId.equals(MessageType.VOTE.toString())) {
+            toDiePlayers.put(content, toDiePlayers.getOrDefault(content, 0) + 1); // lista da votação // TODO adicionei isso
         }
     }
 }

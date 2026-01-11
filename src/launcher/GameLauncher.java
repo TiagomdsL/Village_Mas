@@ -22,7 +22,7 @@ public class GameLauncher {
     /* ================= CONFIGURAÇÕES DO JOGO ================= */
 
     // Jogadores
-    private int numPlayers = 50;
+    private int numPlayers = 20;
     private double werewolvesRatio = 0.2 + (Math.random() * 2 - 1) * 0.05;
 
     // Roles especiais

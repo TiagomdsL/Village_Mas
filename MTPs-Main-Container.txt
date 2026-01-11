@@ -1,1 +1,1 @@
-http://LOURENCO:7778/acc
+http://DESKTOP-N25S72B.lan:7778/acc

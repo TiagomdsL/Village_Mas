@@ -1,5 +1,6 @@
 package agents;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -157,6 +158,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
             }
         }
         if (target != null) {
+            System.out.println("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLL " + getLocalName() + " is voting for " + target + " with trust " + minTrust);
             ACLMessage vote = new ACLMessage(ACLMessage.INFORM);
             vote.setConversationId(MessageType.VOTE.name());
             vote.setContent(target);
@@ -265,10 +267,16 @@ public class VillagerAgent extends AbstractPlayerAgent {
     }
 
     protected void reactToAmbient() {
-        for (java.util.Map.Entry<String, java.util.Map<model.Role, Double>> entry : super.beliefs.entrySet()) {
+        for (Map.Entry<String, Map<model.Role, Double>> entry : super.beliefs.entrySet()) {
             String playerName = entry.getKey();
-            java.util.Map<model.Role, Double> roleProbs = entry.getValue();
-            
+            Map<model.Role, Double> roleProbs = entry.getValue();
+
+            // TODO 2 linhas abaixo evitaram um erro (solução gpt, pode ser temporario), porque n acontece nada
+            // TODO tem que ser investigado o acusations, que acontece no handleAccusation
+            acusations.computeIfAbsent(playerName, k -> new ArrayList<>());
+            trusts.computeIfAbsent(playerName, k -> new ArrayList<>());
+
+
             // Pular a si próprio
             if (playerName.equals(getLocalName())) continue;
             
