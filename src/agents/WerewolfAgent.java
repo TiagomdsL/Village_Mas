@@ -23,13 +23,23 @@ public class WerewolfAgent extends VillagerAgent {
         super.processMessage(messageType, content, sender);
         if (messageType == MessageType.WEREWOLF_ATTACK) {
             // Recebeu a proposta para atacar alguém
-            if (super.currSeer!= null ) {
+           /* if (super.currSeer!= null )
                 kill(super.currSeer);
-            }
-            else if (super.currDoctor != null ) {
+
+            else if (super.currDoctor != null )
                 kill(super.currDoctor);
+
+            else
+                handleWerewolfAttack(sender);*/
+            if (super.currSeer != null && super.trust.containsKey(super.currSeer)) {
+                kill(super.currSeer);
+            } else if (super.currDoctor != null && super.trust.containsKey(super.currDoctor)) {
+                kill(super.currDoctor);
+            } else {
+                // 2. Se não conhece ninguém, usa a lógica de desconfiança
+                handleWerewolfAttack(sender);
             }
-            handleWerewolfAttack(sender);
+
         } else if (messageType == MessageType.WEREWOLF_QUESTION) {
             // Os werewolfs receberam a pergunta de outro werewolf sobre quem atacar
             handleWerewolfQuestion(sender);

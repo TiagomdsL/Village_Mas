@@ -315,12 +315,6 @@ public class VillagerAgent extends AbstractPlayerAgent {
             String playerName = entry.getKey();
             Map<model.Role, Double> roleProbs = entry.getValue();
 
-            // TODO 2 linhas abaixo evitaram um erro (solução gpt, pode ser temporario), porque n acontece nada
-            // TODO tem que ser investigado o acusations, que acontece no handleAccusation
-            //acusations.computeIfAbsent(playerName, k -> new ArrayList<>());
-            //trusts.computeIfAbsent(playerName, k -> new ArrayList<>());
-
-
             // Pular a si próprio
             if (playerName.equals(getLocalName())) continue;
             

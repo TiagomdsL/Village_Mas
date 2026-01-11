@@ -4,7 +4,7 @@
     "round": 1,
     "data": [{
       "role": "VILLAGER",
-      "name": "Player9"
+      "name": "Player20"
     }],
     "type": "DEAD_PLAYERS"
   },
@@ -13,8 +13,39 @@
     "round": 1,
     "data": [
       {
+        "role": "HUNTER",
+        "name": "Player19"
+      },
+      {
+        "role": "HUNTER",
+        "name": "Player19"
+      }
+    ],
+    "type": "PROTECTED_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 1,
+    "data": [
+      {
+        "role": "HUNTER",
+        "name": "Player19"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player18"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player9"
+      },
+      {
         "role": "VILLAGER",
         "name": "Player6"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player15"
       },
       {
         "role": "VILLAGER",
@@ -22,6 +53,14 @@
       },
       {
         "role": "VILLAGER",
+        "name": "Player14"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player17"
+      },
+      {
+        "role": "SEER",
         "name": "Player8"
       },
       {
@@ -29,7 +68,15 @@
         "name": "Player7"
       },
       {
-        "role": "HUNTER",
+        "role": "SEER",
+        "name": "Player16"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      },
+      {
+        "role": "VILLAGER",
         "name": "Player2"
       },
       {
@@ -41,11 +88,19 @@
         "name": "Player10"
       },
       {
-        "role": "VILLAGER",
+        "role": "DOCTOR",
         "name": "Player4"
       },
       {
-        "role": "WEREWOLF",
+        "role": "DOCTOR",
+        "name": "Player13"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player12"
+      },
+      {
+        "role": "VILLAGER",
         "name": "Player3"
       }
     ],
@@ -53,20 +108,135 @@
   },
   {
     "phase": "DAY",
+    "round": 2,
+    "data": [{
+      "role": "VILLAGER",
+      "name": "Player3"
+    }],
+    "type": "DEAD_PLAYERS"
+  },
+  {
+    "phase": "DAY",
+    "round": 2,
+    "data": [
+      {
+        "role": "HUNTER",
+        "name": "Player19"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player18"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player9"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player6"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player15"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player5"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player14"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player17"
+      },
+      {
+        "role": "SEER",
+        "name": "Player8"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player7"
+      },
+      {
+        "role": "SEER",
+        "name": "Player16"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player2"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player1"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player10"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player4"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player13"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player12"
+      }
+    ],
+    "type": "ALIVE_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
     "round": 2,
     "data": [{
       "role": "HUNTER",
-      "name": "Player2"
+      "name": "Player19"
     }],
     "type": "DEAD_PLAYERS"
   },
   {
-    "phase": "DAY",
+    "phase": "NIGHT",
+    "round": 2,
+    "data": [
+      {
+        "role": "SEER",
+        "name": "Player16"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player2"
+      }
+    ],
+    "type": "PROTECTED_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
     "round": 2,
     "data": [
       {
         "role": "VILLAGER",
+        "name": "Player18"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player9"
+      },
+      {
+        "role": "VILLAGER",
         "name": "Player6"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player15"
       },
       {
         "role": "VILLAGER",
@@ -74,11 +244,31 @@
       },
       {
         "role": "VILLAGER",
+        "name": "Player14"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player17"
+      },
+      {
+        "role": "SEER",
         "name": "Player8"
       },
       {
         "role": "WEREWOLF",
         "name": "Player7"
+      },
+      {
+        "role": "SEER",
+        "name": "Player16"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player2"
       },
       {
         "role": "VILLAGER",
@@ -89,67 +279,16 @@
         "name": "Player10"
       },
       {
-        "role": "VILLAGER",
+        "role": "DOCTOR",
         "name": "Player4"
       },
       {
-        "role": "WEREWOLF",
-        "name": "Player3"
-      }
-    ],
-    "type": "ALIVE_PLAYERS"
-  },
-  {
-    "phase": "NIGHT",
-    "round": 2,
-    "data": [{
-      "hunter": "Player2",
-      "target": "Player3"
-    }],
-    "type": "HUNTER_KILL"
-  },
-  {
-    "phase": "NIGHT",
-    "round": 2,
-    "data": [
-      {
-        "role": "WEREWOLF",
-        "name": "Player3"
+        "role": "DOCTOR",
+        "name": "Player13"
       },
       {
         "role": "VILLAGER",
-        "name": "Player6"
-      }
-    ],
-    "type": "DEAD_PLAYERS"
-  },
-  {
-    "phase": "NIGHT",
-    "round": 2,
-    "data": [
-      {
-        "role": "VILLAGER",
-        "name": "Player5"
-      },
-      {
-        "role": "VILLAGER",
-        "name": "Player8"
-      },
-      {
-        "role": "WEREWOLF",
-        "name": "Player7"
-      },
-      {
-        "role": "VILLAGER",
-        "name": "Player1"
-      },
-      {
-        "role": "VILLAGER",
-        "name": "Player10"
-      },
-      {
-        "role": "VILLAGER",
-        "name": "Player4"
+        "name": "Player12"
       }
     ],
     "type": "ALIVE_PLAYERS"
@@ -157,6 +296,594 @@
   {
     "phase": "DAY",
     "round": 3,
+    "data": [{
+      "role": "VILLAGER",
+      "name": "Player18"
+    }],
+    "type": "DEAD_PLAYERS"
+  },
+  {
+    "phase": "DAY",
+    "round": 3,
+    "data": [
+      {
+        "role": "WEREWOLF",
+        "name": "Player9"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player6"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player15"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player5"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player14"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player17"
+      },
+      {
+        "role": "SEER",
+        "name": "Player8"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player7"
+      },
+      {
+        "role": "SEER",
+        "name": "Player16"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player2"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player1"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player10"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player4"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player13"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player12"
+      }
+    ],
+    "type": "ALIVE_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 3,
+    "data": [{
+      "role": "VILLAGER",
+      "name": "Player6"
+    }],
+    "type": "DEAD_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 3,
+    "data": [
+      {
+        "role": "VILLAGER",
+        "name": "Player10"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player14"
+      }
+    ],
+    "type": "PROTECTED_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 3,
+    "data": [
+      {
+        "role": "WEREWOLF",
+        "name": "Player9"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player15"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player5"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player14"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player17"
+      },
+      {
+        "role": "SEER",
+        "name": "Player8"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player7"
+      },
+      {
+        "role": "SEER",
+        "name": "Player16"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player2"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player1"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player10"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player4"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player13"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player12"
+      }
+    ],
+    "type": "ALIVE_PLAYERS"
+  },
+  {
+    "phase": "DAY",
+    "round": 4,
+    "data": [{
+      "role": "WEREWOLF",
+      "name": "Player9"
+    }],
+    "type": "DEAD_PLAYERS"
+  },
+  {
+    "phase": "DAY",
+    "round": 4,
+    "data": [
+      {
+        "role": "VILLAGER",
+        "name": "Player15"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player5"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player14"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player17"
+      },
+      {
+        "role": "SEER",
+        "name": "Player8"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player7"
+      },
+      {
+        "role": "SEER",
+        "name": "Player16"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player2"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player1"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player10"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player4"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player13"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player12"
+      }
+    ],
+    "type": "ALIVE_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 4,
+    "data": [{
+      "role": "VILLAGER",
+      "name": "Player15"
+    }],
+    "type": "DEAD_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 4,
+    "data": [
+      {
+        "role": "VILLAGER",
+        "name": "Player5"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      }
+    ],
+    "type": "PROTECTED_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 4,
+    "data": [
+      {
+        "role": "VILLAGER",
+        "name": "Player5"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player14"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player17"
+      },
+      {
+        "role": "SEER",
+        "name": "Player8"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player7"
+      },
+      {
+        "role": "SEER",
+        "name": "Player16"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player2"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player1"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player10"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player4"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player13"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player12"
+      }
+    ],
+    "type": "ALIVE_PLAYERS"
+  },
+  {
+    "phase": "DAY",
+    "round": 5,
+    "data": [{
+      "role": "VILLAGER",
+      "name": "Player5"
+    }],
+    "type": "DEAD_PLAYERS"
+  },
+  {
+    "phase": "DAY",
+    "round": 5,
+    "data": [
+      {
+        "role": "VILLAGER",
+        "name": "Player14"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player17"
+      },
+      {
+        "role": "SEER",
+        "name": "Player8"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player7"
+      },
+      {
+        "role": "SEER",
+        "name": "Player16"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player2"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player1"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player10"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player4"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player13"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player12"
+      }
+    ],
+    "type": "ALIVE_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 5,
+    "data": [{
+      "role": "VILLAGER",
+      "name": "Player14"
+    }],
+    "type": "DEAD_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 5,
+    "data": [
+      {
+        "role": "VILLAGER",
+        "name": "Player1"
+      },
+      {
+        "role": "SEER",
+        "name": "Player16"
+      }
+    ],
+    "type": "PROTECTED_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 5,
+    "data": [
+      {
+        "role": "VILLAGER",
+        "name": "Player17"
+      },
+      {
+        "role": "SEER",
+        "name": "Player8"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player7"
+      },
+      {
+        "role": "SEER",
+        "name": "Player16"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player2"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player1"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player10"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player4"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player13"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player12"
+      }
+    ],
+    "type": "ALIVE_PLAYERS"
+  },
+  {
+    "phase": "DAY",
+    "round": 6,
+    "data": [{
+      "role": "VILLAGER",
+      "name": "Player17"
+    }],
+    "type": "DEAD_PLAYERS"
+  },
+  {
+    "phase": "DAY",
+    "round": 6,
+    "data": [
+      {
+        "role": "SEER",
+        "name": "Player8"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player7"
+      },
+      {
+        "role": "SEER",
+        "name": "Player16"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player2"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player1"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player10"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player4"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player13"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player12"
+      }
+    ],
+    "type": "ALIVE_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 6,
+    "data": [{
+      "role": "SEER",
+      "name": "Player8"
+    }],
+    "type": "DEAD_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 6,
+    "data": [
+      {
+        "role": "WEREWOLF",
+        "name": "Player7"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player4"
+      }
+    ],
+    "type": "PROTECTED_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 6,
+    "data": [
+      {
+        "role": "WEREWOLF",
+        "name": "Player7"
+      },
+      {
+        "role": "SEER",
+        "name": "Player16"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player2"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player1"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player10"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player4"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player13"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player12"
+      }
+    ],
+    "type": "ALIVE_PLAYERS"
+  },
+  {
+    "phase": "DAY",
+    "round": 7,
     "data": [{
       "role": "WEREWOLF",
       "name": "Player7"
@@ -165,15 +892,19 @@
   },
   {
     "phase": "DAY",
-    "round": 3,
+    "round": 7,
     "data": [
       {
-        "role": "VILLAGER",
-        "name": "Player5"
+        "role": "SEER",
+        "name": "Player16"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
       },
       {
         "role": "VILLAGER",
-        "name": "Player8"
+        "name": "Player2"
       },
       {
         "role": "VILLAGER",
@@ -184,8 +915,206 @@
         "name": "Player10"
       },
       {
-        "role": "VILLAGER",
+        "role": "DOCTOR",
         "name": "Player4"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player13"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player12"
+      }
+    ],
+    "type": "ALIVE_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 7,
+    "data": [{
+      "role": "SEER",
+      "name": "Player16"
+    }],
+    "type": "DEAD_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 7,
+    "data": [
+      {
+        "role": "VILLAGER",
+        "name": "Player10"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      }
+    ],
+    "type": "PROTECTED_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 7,
+    "data": [
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player2"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player1"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player10"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player4"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player13"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player12"
+      }
+    ],
+    "type": "ALIVE_PLAYERS"
+  },
+  {
+    "phase": "DAY",
+    "round": 8,
+    "data": [{
+      "role": "VILLAGER",
+      "name": "Player2"
+    }],
+    "type": "DEAD_PLAYERS"
+  },
+  {
+    "phase": "DAY",
+    "round": 8,
+    "data": [
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player1"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player10"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player4"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player13"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player12"
+      }
+    ],
+    "type": "ALIVE_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 8,
+    "data": [{
+      "role": "VILLAGER",
+      "name": "Player1"
+    }],
+    "type": "DEAD_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 8,
+    "data": [
+      {
+        "role": "VILLAGER",
+        "name": "Player1"
+      },
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      }
+    ],
+    "type": "PROTECTED_PLAYERS"
+  },
+  {
+    "phase": "NIGHT",
+    "round": 8,
+    "data": [
+      {
+        "role": "WEREWOLF",
+        "name": "Player11"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player1"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player10"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player4"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player13"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player12"
+      }
+    ],
+    "type": "ALIVE_PLAYERS"
+  },
+  {
+    "phase": "DAY",
+    "round": 9,
+    "data": [{
+      "role": "WEREWOLF",
+      "name": "Player11"
+    }],
+    "type": "DEAD_PLAYERS"
+  },
+  {
+    "phase": "DAY",
+    "round": 9,
+    "data": [
+      {
+        "role": "VILLAGER",
+        "name": "Player1"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player10"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player4"
+      },
+      {
+        "role": "DOCTOR",
+        "name": "Player13"
+      },
+      {
+        "role": "VILLAGER",
+        "name": "Player12"
       }
     ],
     "type": "ALIVE_PLAYERS"
