@@ -14,6 +14,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
     protected Map<String, List<String>> trusts = new java.util.HashMap<>();
     protected String currSeer = "";
     protected String currDoctor = "";
+    protected String currWerewolf = "";
     protected List<String> wasProtected = new java.util.ArrayList<>();
 
     @Override
@@ -30,6 +31,9 @@ public class VillagerAgent extends AbstractPlayerAgent {
             return; // Formato inválido
         }
         String accusedAgent = parts[0];
+        if (!acusations.containsKey(sender)) {
+            acusations.put(sender, new ArrayList<>());
+        }
         acusations.get(sender).add(accusedAgent);
         String reason = parts[1]; // por enquanto n tem uso
         double senderTrust = super.trust.get(sender);
@@ -57,6 +61,9 @@ public class VillagerAgent extends AbstractPlayerAgent {
             return; // Formato inválido
         }
         String trustedAgent = parts[0];
+        if (!trusts.containsKey(sender)) {
+            trusts.put(sender, new ArrayList<>());
+        }
         trusts.get(sender).add(trustedAgent);
         String reason = parts[1]; // por enquanto n tem uso
         double senderTrust = super.trust.get(sender);
@@ -168,16 +175,30 @@ public class VillagerAgent extends AbstractPlayerAgent {
 
     // 30% de chance de acusar alguém, 20% de chance de revelar o seu papel, 20% de chance de dizer em quem confia mais, 30% de ficar calado
     protected void discuss() {
-        Random random = new Random();
-        double decision = random.nextDouble();
-        if (decision < 0.3) {
-            acuse();
-        } else if (decision < 0.5) {
-            revealRole();
-        } else if (decision < 0.7) {
-            trustSomeone();
-        } else{
-            // remain silent
+        if (currWerewolf != null && !currWerewolf.isEmpty()) {
+            acuse(currWerewolf);
+            return;
+        }
+        else if (currSeer != null && !currSeer.isEmpty()) {
+            trust(currSeer);
+            return;
+        }
+        else if (currDoctor != null && !currDoctor.isEmpty()) {
+            trust(currDoctor);
+            return;
+        }
+        else { 
+            Random random = new Random();
+            double decision = random.nextDouble();
+            if (decision < 0.3) {
+                acuse();
+            } else if (decision < 0.5) {
+                revealRole();
+            } else if (decision < 0.7) {
+                trustSomeone();
+            } else{
+                // remain silent
+            }
         }
     }
 
@@ -233,6 +254,30 @@ public class VillagerAgent extends AbstractPlayerAgent {
         }
     }
 
+    protected void acuse(String target) {
+        ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+        msg.setConversationId(MessageType.ACCUSATION.name());
+        msg.setContent(target);
+        for (String player : super.trust.keySet()) {
+            if (!player.equals(getLocalName())) {
+                msg.addReceiver(new AID(player, AID.ISLOCALNAME));
+            }
+        }
+        send(msg);
+    }
+
+    protected void trust(String target) {
+        ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+        msg.setConversationId(MessageType.TRUST.name());
+        msg.setContent(target);
+        for (String player : super.trust.keySet()) {
+            if (!player.equals(getLocalName())) {
+                msg.addReceiver(new AID(player, AID.ISLOCALNAME));
+            }
+        }
+        send(msg);
+    }
+
     // revela o seu papel
     protected void revealRole() {
         String role = decideRole();
@@ -272,8 +317,8 @@ public class VillagerAgent extends AbstractPlayerAgent {
 
             // TODO 2 linhas abaixo evitaram um erro (solução gpt, pode ser temporario), porque n acontece nada
             // TODO tem que ser investigado o acusations, que acontece no handleAccusation
-            acusations.computeIfAbsent(playerName, k -> new ArrayList<>());
-            trusts.computeIfAbsent(playerName, k -> new ArrayList<>());
+            //acusations.computeIfAbsent(playerName, k -> new ArrayList<>());
+            //trusts.computeIfAbsent(playerName, k -> new ArrayList<>());
 
 
             // Pular a si próprio
@@ -282,20 +327,24 @@ public class VillagerAgent extends AbstractPlayerAgent {
             double trustLevel = super.trust.getOrDefault(playerName, 0.5);
                
             // Se foi identificado como werewolf antes
-            for (String acusees : acusations.get(playerName)) {
-                if (super.wasWerewolf.contains(acusees)) {
-                    super.updateBelief(playerName, model.Role.SEER, 1); // quase certeza
-                    if(this.myRole != model.Role.WEREWOLF) {
-                        super.updateTrust(playerName, 0.5);
+            if( acusations.containsKey(playerName)) {
+                for (String acusees : acusations.get(playerName)) {
+                    if (super.wasWerewolf.contains(acusees)) {
+                        super.updateBelief(playerName, model.Role.SEER, 1); // quase certeza
+                        if(this.myRole != model.Role.WEREWOLF) {
+                            super.updateTrust(playerName, 0.5);
+                        }
                     }
                 }
             }
 
-            for (String trusteds : trusts.get(playerName)) {
-                if (this.wasProtected.contains(trusteds)) {
-                    super.updateBelief(playerName, model.Role.DOCTOR, 1); // quase certeza
-                    if(this.myRole != model.Role.WEREWOLF) {
-                        super.updateTrust(playerName, 0.5);
+            if (trusts.containsKey(playerName)) {
+                for (String trusteds : trusts.get(playerName)) {
+                    if (this.wasProtected.contains(trusteds)) {
+                        super.updateBelief(playerName, model.Role.DOCTOR, 1); // quase certeza
+                        if(this.myRole != model.Role.WEREWOLF) {
+                            super.updateTrust(playerName, 0.5);
+                        }
                     }
                 }
             }
@@ -333,6 +382,8 @@ public class VillagerAgent extends AbstractPlayerAgent {
         double maxDoctorProb = 0.0;
         String maxSeer = null;
         double maxSeerProb = 0.0;
+        String maxWerewolf = null;
+        double maxWerewolfProb = 0.0;
         
         for (java.util.Map.Entry<String, java.util.Map<model.Role, Double>> entry : super.beliefs.entrySet()) {
             String playerName = entry.getKey();
@@ -342,6 +393,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
             
             double doctorProb = roleProbs.get(model.Role.DOCTOR);
             double seerProb = roleProbs.get(model.Role.SEER);
+            double werewolfProb = roleProbs.get(model.Role.WEREWOLF);
             
             if (doctorProb > maxDoctorProb) {
                 maxDoctorProb = doctorProb;
@@ -352,10 +404,16 @@ public class VillagerAgent extends AbstractPlayerAgent {
                 maxSeerProb = seerProb;
                 maxSeer = playerName;
             }
+
+            if (werewolfProb > maxWerewolfProb) {
+                maxWerewolfProb = werewolfProb;
+                maxWerewolf = playerName;
+            }
         }
-        
-        this.currDoctor = (maxDoctor != null) ? maxDoctor : "";
-        this.currSeer = (maxSeer != null) ? maxSeer : "";     
+
+        this.currDoctor = (maxDoctor != null && maxDoctorProb > 0.7) ? maxDoctor : "";
+        this.currSeer = (maxSeer != null && maxSeerProb > 0.7) ? maxSeer : ""; 
+        this.currWerewolf = (maxWerewolf != null && maxWerewolfProb > 0.7) ? maxWerewolf : "";    
     }
 }
 

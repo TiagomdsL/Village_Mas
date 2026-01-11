@@ -23,6 +23,12 @@ public class WerewolfAgent extends VillagerAgent {
         super.processMessage(messageType, content, sender);
         if (messageType == MessageType.WEREWOLF_ATTACK) {
             // Recebeu a proposta para atacar alguém
+            if (super.currSeer!= null ) {
+                kill(super.currSeer);
+            }
+            else if (super.currDoctor != null ) {
+                kill(super.currDoctor);
+            }
             handleWerewolfAttack(sender);
         } else if (messageType == MessageType.WEREWOLF_QUESTION) {
             // Os werewolfs receberam a pergunta de outro werewolf sobre quem atacar
@@ -103,6 +109,14 @@ public class WerewolfAgent extends VillagerAgent {
         } else {
             werewolfQuestion();
         }
+    }
+
+    protected void kill(String target) {
+        ACLMessage attack = new ACLMessage(ACLMessage.INFORM);
+        attack.setConversationId(MessageType.WEREWOLF_ATTACK.name());
+        attack.setContent(target);
+        attack.addReceiver(new AID(gameMasterAddr, AID.ISLOCALNAME));
+        send(attack);
     }
 
     @Override
@@ -253,7 +267,11 @@ public class WerewolfAgent extends VillagerAgent {
                 super.updateBelief(wolf, model.Role.WEREWOLF, 1.0);
             }
         }
-        super.updateTrust(super.currSeer, -1.0); // se o seer está vivo, é prioridade máxima matar
-        super.updateTrust(super.currDoctor, -0.5); // doctor é prioridade alta de matar
+        if(super.trust.containsKey(super.currSeer)) {
+             super.updateTrust(super.currSeer, -1.0); // se o seer está vivo, é prioridade máxima matar
+        }
+        if(super.trust.containsKey(super.currDoctor)) {
+            super.updateTrust(super.currDoctor, -0.5); // doctor é prioridade alta de matar
+        }
     }
 }

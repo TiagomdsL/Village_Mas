@@ -6,8 +6,15 @@ import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import model.MessageType;
 import model.Role;
+import java.util.Map;
 
 public class SeerAgent extends VillagerAgent {
+
+    protected Map<String, String> seerResults = new java.util.HashMap<>();
+    protected boolean needToAcuse = false;
+    protected String accuseTarget = null;
+    protected boolean needToProtect = false;
+    protected String protectTarget = null; 
 
     @Override
     protected void setup() {
@@ -46,15 +53,49 @@ public class SeerAgent extends VillagerAgent {
         }
     }
 
+    @Override
+    protected void discuss() {
+        for (String player : super.trust.keySet()) {
+            if (seerResults.containsKey(player) && seerResults.get(player).equals(Role.WEREWOLF.name())) {
+                needToAcuse = true;
+                accuseTarget = player;  
+            }
+        }
+        for (String player : super.trust.keySet()) {
+            if (seerResults.containsKey(player) && seerResults.get(player).equals(Role.DOCTOR.name())) {
+                needToProtect = true;
+                protectTarget = player;  
+            }
+        }
+        if (needToAcuse && accuseTarget != null) {  // prioriza acusar werewolfs conhecidos
+            acuse(accuseTarget);
+            needToAcuse = false;
+            accuseTarget = null;
+        } else if (needToProtect && protectTarget != null) { // depois prioriza proteger doctors conhecidos
+            trust(protectTarget);
+            needToProtect = false;
+            protectTarget = null;
+        } else {                            // senao segue a discussao normal
+            super.discuss();
+        }
+    }
+
+    
+
     // altera o trust com base no content recebido ("AgentX ROLE")
     private void handleSeerReceive(String content, String sender) {
         if (content == null) return;
         content = content.trim();
         if (content.isEmpty()) return;
-//        System.out.println("Ent a role deste é " + content);
-
+        seerResults.put(sender, content);
         if (content.equals(Role.WEREWOLF.name())) {
             super.updateTrust(sender, -1.0);
+            needToAcuse = true;
+            accuseTarget = sender;
+        } else if (content.equals(Role.DOCTOR.name())) {
+            needToProtect = true;
+            protectTarget = sender;
+            super.updateTrust(sender, 1.0);
         } else {
             super.updateTrust(sender, 1.0);
         }
@@ -77,5 +118,14 @@ public class SeerAgent extends VillagerAgent {
             role = "HUNTER";
         }
         return role;
+    }
+
+    @Override
+    protected void reactToAmbient() {
+        super.reactToAmbient();
+        for (String player : seerResults.keySet()) {
+            String role = seerResults.get(player);
+            super.updateBelief(player, Role.valueOf(role), 1.0);
+        }
     }
 }
