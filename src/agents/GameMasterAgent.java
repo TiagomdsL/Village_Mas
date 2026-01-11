@@ -132,10 +132,7 @@ public class GameMasterAgent extends Agent {
 
         @Override
         public int onEnd() {
-            killByVote();
-            alivePlayersJson("DAY");
-            killPlayersJson("DAY");
-            killPlayers();
+            killByVote("DAY");
 
             broadcastSystem("Day phase ended.", MessageType.SYSTEM);
             GamePhaseBehaviour fsm = (GamePhaseBehaviour) getParent();
@@ -199,9 +196,7 @@ public class GameMasterAgent extends Agent {
 
         @Override
         public int onEnd() {
-            killByVote();
-            alivePlayersJson("NIGHT");
-            killPlayersJson("NIGHT");
+            killByVote("NIGHT");
 
             broadcastSystem("Night phase ended.", MessageType.SYSTEM);
             GamePhaseBehaviour fsm = (GamePhaseBehaviour) getParent();
@@ -364,7 +359,7 @@ public class GameMasterAgent extends Agent {
     }
 
     // mata o jogador com mais votos, na votação dos werewolfes ou dos villagers
-    private void killByVote() {
+    private void killByVote(String phase) {
         if (!toDiePlayers.isEmpty()) {
             String mostVotedPlayer = null;
             int maxVotes = -1;
@@ -381,7 +376,9 @@ public class GameMasterAgent extends Agent {
             }
         }
         toDiePlayers.clear();
+        killPlayersJson(phase);
         killPlayers();
+        alivePlayersJson(phase);
     }
 
     // verificação da condição de fim de jogo
