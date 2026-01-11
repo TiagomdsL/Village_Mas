@@ -158,7 +158,6 @@ public class VillagerAgent extends AbstractPlayerAgent {
             }
         }
         if (target != null) {
-            System.out.println("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLL " + getLocalName() + " is voting for " + target + " with trust " + minTrust);
             ACLMessage vote = new ACLMessage(ACLMessage.INFORM);
             vote.setConversationId(MessageType.VOTE.name());
             vote.setContent(target);

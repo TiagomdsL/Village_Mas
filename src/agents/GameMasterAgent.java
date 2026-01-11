@@ -108,14 +108,14 @@ public class GameMasterAgent extends Agent {
                     broadcastSystem("Start Voting", MessageType.VOTE);
                     votingStarted = false;
                 }
-
                 ACLMessage msg = receive();
-                if (msg != null) {
+                while ((msg = receive()) != null) {
                     String sender = msg.getSender().getLocalName();
                     String content = msg.getContent();
                     String convId = msg.getConversationId();
-                    mensage_type(convId, sender, content); //TODO modificar o metodo para aceitar os votos
+                    mensage_type(convId, sender, content);
                 }
+
             } else if (ticks >= 5) {
                 votingStarted = true;
                 stop();
@@ -124,7 +124,7 @@ public class GameMasterAgent extends Agent {
 
         @Override
         public int onEnd() {
-            killPlayers();
+            killByVote();
             broadcastSystem("Day phase ended.", MessageType.SYSTEM);
             GamePhaseBehaviour fsm = (GamePhaseBehaviour) getParent();
             fsm.registerState(new NightPhaseBehaviour(myAgent, 1000), GamePhase.NIGHT.toString()); // para garantir que a noite seja a próxima fase devido aos tickes após a primeira noite
@@ -134,6 +134,7 @@ public class GameMasterAgent extends Agent {
 
     private class NightPhaseBehaviour extends TickerBehaviour {
         private int ticks = 0;
+        private ACLMessage msg;
 
         public NightPhaseBehaviour(Agent a, long period) {
             super(a, period);
@@ -173,8 +174,7 @@ public class GameMasterAgent extends Agent {
         protected void onTick() {
             ticks++;
 
-            ACLMessage msg = receive();
-            if (msg != null) {
+            while ((msg = receive()) != null) {
                 String sender = msg.getSender().getLocalName();
                 String content = msg.getContent();
                 String convId = msg.getConversationId();
@@ -187,23 +187,7 @@ public class GameMasterAgent extends Agent {
 
         @Override
         public int onEnd() {
-            if (!toDiePlayers.isEmpty()) {
-                String mostVotedPlayer = null;
-                int maxVotes = -1;
-
-                for (Map.Entry<String, Integer> entry : toDiePlayers.entrySet()) {
-                    if (entry.getValue() > maxVotes) {
-                        maxVotes = entry.getValue();
-                        mostVotedPlayer = entry.getKey();
-                    }
-                }
-
-                if (mostVotedPlayer != null) {
-                    toKill.add(mostVotedPlayer);
-                }
-            }
-            toDiePlayers.clear();
-            killPlayers();
+            killByVote();
 
             broadcastSystem("Night phase ended.", MessageType.SYSTEM);
             GamePhaseBehaviour fsm = (GamePhaseBehaviour) getParent();
@@ -355,7 +339,27 @@ public class GameMasterAgent extends Agent {
         }
 
         if (!toKill.isEmpty()) killPlayers(); // recursividade para tratar as mortes causadas pelo hunter
+    }
 
+    // mata o jogador com mais votos, na votação dos werewolfes ou dos villagers
+    private void killByVote() {
+        if (!toDiePlayers.isEmpty()) {
+            String mostVotedPlayer = null;
+            int maxVotes = -1;
+
+            for (Map.Entry<String, Integer> entry : toDiePlayers.entrySet()) {
+                if (entry.getValue() > maxVotes) {
+                    maxVotes = entry.getValue();
+                    mostVotedPlayer = entry.getKey();
+                }
+            }
+
+            if (mostVotedPlayer != null) {
+                toKill.add(mostVotedPlayer);
+            }
+        }
+        toDiePlayers.clear();
+        killPlayers();
     }
 
     // verificação da condição de fim de jogo
@@ -382,7 +386,8 @@ public class GameMasterAgent extends Agent {
             System.out.println("Adicionando jogador a lista de mortos pelo hunter: " + content);
             toKill.add(content);
         } else if (convId.equals(MessageType.VOTE.toString())) {
-            toDiePlayers.put(content, toDiePlayers.getOrDefault(content, 0) + 1); // lista da votação // TODO adicionei isso
+            toDiePlayers.put(content, toDiePlayers.getOrDefault(content, 0) + 1); // lista da votação
+//            System.out.println("Voto recebido de " + sender + " para " + content);
         }
     }
 }
