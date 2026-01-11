@@ -23,14 +23,6 @@ public class WerewolfAgent extends VillagerAgent {
         super.processMessage(messageType, content, sender);
         if (messageType == MessageType.WEREWOLF_ATTACK) {
             // Recebeu a proposta para atacar alguém
-           /* if (super.currSeer!= null )
-                kill(super.currSeer);
-
-            else if (super.currDoctor != null )
-                kill(super.currDoctor);
-
-            else
-                handleWerewolfAttack(sender);*/
             if (super.currSeer != null && super.trust.containsKey(super.currSeer)) {
                 kill(super.currSeer);
             } else if (super.currDoctor != null && super.trust.containsKey(super.currDoctor)) {

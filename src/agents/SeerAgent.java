@@ -53,35 +53,6 @@ public class SeerAgent extends VillagerAgent {
         }
     }
 
-    @Override
-    protected void discuss() {
-        for (String player : super.trust.keySet()) {
-            if (seerResults.containsKey(player) && seerResults.get(player).equals(Role.WEREWOLF.name())) {
-                needToAcuse = true;
-                accuseTarget = player;  
-            }
-        }
-        for (String player : super.trust.keySet()) {
-            if (seerResults.containsKey(player) && seerResults.get(player).equals(Role.DOCTOR.name())) {
-                needToProtect = true;
-                protectTarget = player;  
-            }
-        }
-        if (needToAcuse && accuseTarget != null) {  // prioriza acusar werewolfs conhecidos
-            acuse(accuseTarget);
-            needToAcuse = false;
-            accuseTarget = null;
-        } else if (needToProtect && protectTarget != null) { // depois prioriza proteger doctors conhecidos
-            trust(protectTarget);
-            needToProtect = false;
-            protectTarget = null;
-        } else {                            // senao segue a discussao normal
-            super.discuss();
-        }
-    }
-
-    
-
     // altera o trust com base no content recebido ("AgentX ROLE")
     private void handleSeerReceive(String content, String sender) {
         if (content == null) return;
@@ -99,8 +70,42 @@ public class SeerAgent extends VillagerAgent {
         } else {
             super.updateTrust(sender, 1.0);
         }
+        ACLMessage ack = new ACLMessage(ACLMessage.INFORM); // confirma rececao da informacao
+        ack.setConversationId(MessageType.SEER_REVEAL.name());
+        ack.addReceiver(new AID(gameMasterAddr, AID.ISLOCALNAME));
+        ack.setContent(sender);
+        send(ack);
     }
-    
+
+    @Override
+    protected void discuss() {
+        for (String player : super.trust.keySet()) {
+            if (seerResults.containsKey(player) && seerResults.get(player).equals(Role.WEREWOLF.name())) {
+                needToAcuse = true;
+                accuseTarget = player;
+            }
+        }
+        for (String player : super.trust.keySet()) {
+            if (seerResults.containsKey(player) && seerResults.get(player).equals(Role.DOCTOR.name())) {
+                needToProtect = true;
+                protectTarget = player;
+            }
+        }
+        if (needToAcuse && accuseTarget != null) {  // prioriza acusar werewolfs conhecidos
+            acuse(accuseTarget);
+            needToAcuse = false;
+            accuseTarget = null;
+        } else if (needToProtect && protectTarget != null) { // depois prioriza proteger doctors conhecidos
+            trust(protectTarget);
+            needToProtect = false;
+            protectTarget = null;
+        } else {                            // senao segue a discussao normal
+            super.discuss();
+        }
+    }
+
+
+
     @Override
     protected String decideRole() {
         Random random = new Random();

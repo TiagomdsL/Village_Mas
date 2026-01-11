@@ -388,7 +388,7 @@ public class GameMasterAgent extends Agent {
         for (Role role : playerRoles.values()) {
             if (role == Role.WEREWOLF) {
                 werewolves++;
-            } else if (role == Role.VILLAGER) {
+            } else  {
                 villagers++;
             }
         }
@@ -398,17 +398,32 @@ public class GameMasterAgent extends Agent {
 
     private void mensage_type(String convId, String sender, String content) {
         if (convId.equals(MessageType.WEREWOLF_ATTACK.toString())) {
-            toDiePlayers.put(content, toDiePlayers.getOrDefault(content, 0) + 1); // lista da votação
+            toDiePlayers.put(content, toDiePlayers.getOrDefault(content, 0) + 1); // votação de quem morrer dos werewolfes
+
         } else if (convId.equals(MessageType.DOCTOR_PROTECT.toString())) {
             protectedPlayers.add(content);
-        } else if (convId.equals(MessageType.HUNTER_KILL.toString())) { // o hunter matou alguém, adicionar à lista de mortos
-            System.out.println("Adicionando jogador a lista de mortos pelo hunter: " + content);
+
+        } else if (convId.equals(MessageType.HUNTER_KILL.toString())) { // o hunter matou alguém quando foi morto
+//            System.out.println("Adicionando jogador a lista de mortos pelo hunter: " + content);
             hunterJson(sender, content);
             toKill.add(content);
+
         } else if (convId.equals(MessageType.VOTE.toString())) {
-            toDiePlayers.put(content, toDiePlayers.getOrDefault(content, 0) + 1); // lista da votação
+            toDiePlayers.put(content, toDiePlayers.getOrDefault(content, 0) + 1); // votação de quem morrer dos villagers
 //            System.out.println("Voto recebido de " + sender + " para " + content);
+        } else if (convId.equals(MessageType.SEER_REVEAL.toString())){ // seer indica a role de alguém
+            seerJson(sender, content); //serve so para o log
         }
+    }
+
+    private void seerJson(String sender, String content) {
+        JSONArray seerArray = new JSONArray();
+        JSONObject actionObj = new JSONObject();
+        actionObj.put("seer", sender);
+        actionObj.put("target", content);
+        actionObj.put("role", playerRoles.get(content).toString());
+        seerArray.put(actionObj);
+        logEvent("NIGHT", "SEER_REVEAL", seerArray);
     }
 
     private void killPlayersJson(String phase) {

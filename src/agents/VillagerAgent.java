@@ -220,9 +220,8 @@ public class VillagerAgent extends AbstractPlayerAgent {
             trustMsg.setConversationId(MessageType.TRUST.name());
             trustMsg.setContent(target + " is trustworthy");
             for (String p : super.trust.keySet()) {
-                if (!p.equals(getLocalName())) {
+                if (!p.equals(getLocalName()))
                     trustMsg.addReceiver(new AID(p, AID.ISLOCALNAME));
-                }
             }
             send(trustMsg);
         }
@@ -242,15 +241,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
             }
         }
         if (target != null) {
-            ACLMessage accusation = new ACLMessage(ACLMessage.INFORM);
-            accusation.setConversationId(MessageType.ACCUSATION.name());
-            accusation.setContent(target + " Seems suspicious");
-            for (String p : super.trust.keySet()) {
-                if (!p.equals(getLocalName())) {
-                    accusation.addReceiver(new AID(p, AID.ISLOCALNAME));
-                }
-            }
-            send(accusation);
+            acuse(target); // modularização da função
         }
     }
 
