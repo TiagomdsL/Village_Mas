@@ -28,6 +28,10 @@ public class VillagerAgent extends AbstractPlayerAgent {
         if (parts.length < 2) return; // Formato inválido
 
         String accusedAgent = parts[0];
+
+        if (!super.trust.containsKey(sender) || !super.trust.containsKey(accusedAgent))
+            return;
+
         if (!acusations.containsKey(sender)) acusations.put(sender, new ArrayList<>());
 
         acusations.get(sender).add(accusedAgent);
@@ -77,6 +81,9 @@ public class VillagerAgent extends AbstractPlayerAgent {
         if (parts.length < 2) return; // Formato inválido
 
         String trustedAgent = parts[0];
+        if (!super.trust.containsKey(sender) || !super.trust.containsKey(trustedAgent))
+            return;
+
         if (!trustsMessages.containsKey(sender)) trustsMessages.put(sender, new ArrayList<>());
 
         trustsMessages.get(sender).add(trustedAgent);
