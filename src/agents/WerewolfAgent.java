@@ -8,6 +8,7 @@ import java.util.*;
 
 public class WerewolfAgent extends VillagerAgent {
     private List<String> wolves;
+    private boolean question = false;
 
     @Override
     protected void setup() {
@@ -36,6 +37,7 @@ public class WerewolfAgent extends VillagerAgent {
 
     // Pergunta aos outros werewolfs quem atacar
     private void werewolfQuestion() {
+        question = true;
         ACLMessage question = new ACLMessage(ACLMessage.REQUEST);
         question.setConversationId(MessageType.WEREWOLF_QUESTION.name());
         question.setContent("Quem devemos atacar?");
@@ -49,6 +51,7 @@ public class WerewolfAgent extends VillagerAgent {
     private void handleWerewolfQuestion(String sender) {
         String target = null;
         double minTrust = Double.POSITIVE_INFINITY;
+        if (sender.equals(getLocalName())) return; // não deve responder a si mesmo
         for (Map.Entry<String, Double> e : super.trust.entrySet()) {
             String name = e.getKey();
             double t = e.getValue();
@@ -90,7 +93,8 @@ public class WerewolfAgent extends VillagerAgent {
         }
         double doIAskOthers = Math.random();
         double targetTrust = super.trust.get(target);
-        if (target != null && (doIAskOthers < 0.5 || targetTrust == 1.0) && !wolves.contains(target)) {
+        if ((target != null && (doIAskOthers < 0.5 || targetTrust == 1.0) && !wolves.contains(target)) || wolves.size() == 1 || question) {
+            question = false;
             ACLMessage attack = new ACLMessage(ACLMessage.INFORM);
             attack.setConversationId(MessageType.WEREWOLF_ATTACK.name());
             attack.setContent(target);
