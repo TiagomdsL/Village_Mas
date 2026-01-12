@@ -317,7 +317,7 @@ public class GameMasterAgent extends Agent {
     // verificação se houve players mortos
     private void killPlayers() {
         if (!protectedPlayers.isEmpty()) {
-            protectedPlayersJson("NIGHT");
+            protectedPlayersJson();
             for (String p : protectedPlayers) {
                 broadcastSystem("Player " + p + " was protected by the Doctor.", MessageType.SYSTEM);
                 toKill.remove(p);
@@ -431,7 +431,7 @@ public class GameMasterAgent extends Agent {
         logEvent(phase, "ALIVE_PLAYERS", aliveArray);
     }
 
-    private void protectedPlayersJson(String phase) {
+    private void protectedPlayersJson() {
         JSONArray protectedArray = new JSONArray();
         for (String p : protectedPlayers) {
             JSONObject playerObj = new JSONObject();
@@ -439,7 +439,7 @@ public class GameMasterAgent extends Agent {
             playerObj.put("role", playerRoles.get(p).toString());
             protectedArray.put(playerObj);
         }
-        logEvent(phase, "PROTECTED_PLAYERS", protectedArray);
+        logEvent("NIGHT", "PROTECTED_PLAYERS", protectedArray);
     }
 
     private void hunterJson(String hunter, String target) {

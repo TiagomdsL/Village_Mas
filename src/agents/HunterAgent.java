@@ -55,7 +55,7 @@ public class HunterAgent extends VillagerAgent {
         else if (decision < 0.5) role = "VILLAGER";
         else if (decision < 0.6) role = "DOCTOR";
         else if (decision < 0.7) role = "SEER";
-        else if (decision < 1) role = "HUNTER";  // hunter é seguro pois ninguem o quer atacar
+        else role = "HUNTER";  // hunter é seguro pois ninguem o quer atacar
 
         return role;
     }
