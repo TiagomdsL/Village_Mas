@@ -36,16 +36,37 @@ public class VillagerAgent extends AbstractPlayerAgent {
         double accusedTrust = super.trust.get(accusedAgent);
 
         if (senderTrust > 0.5 && accusedTrust >= 0.5)
-            super.updateTrust(accusedAgent, -0.1);  //se o acusador é confiável e o acusado também
+            super.updateTrust(accusedAgent, -0.05);  //se o acusador é confiável e o acusado também
         else if (senderTrust > 0.5)
-            super.updateTrust(accusedAgent, -0.2);  //se o acusador é confiável e o acusado não é
+            super.updateTrust(accusedAgent, -0.1);  //se o acusador é confiável e o acusado não é
         else if (accusedTrust >= 0.5)
-            super.updateTrust(sender, -0.2);    //se o acusador não é confiável e o acusado é
+            super.updateTrust(sender, -0.1);    //se o acusador não é confiável e o acusado é
         else {
-            double deceptionChance = random.nextDouble(-0.2, 0.1);
+            double deceptionChance = random.nextDouble(-0.1, 0.05);
             super.updateTrust(accusedAgent, deceptionChance); // se o acusador e o acusado não são confiáveis
-            deceptionChance = random.nextDouble(-0.2, 0.1);
+            deceptionChance = random.nextDouble(-0.1, 0.05);
             super.updateTrust(sender, deceptionChance);
+        }
+        if (reason.contains("They accused me before")){
+            if( Math.abs(accusedTrust - senderTrust) > 0.2 && accusedTrust < senderTrust){  // se há diferença entre trusts significante e acusado é mais confiável
+                super.updateTrust(accusedAgent, -0.2);
+            } else if (senderTrust < accusedTrust){                                 // se o acusador é menos confiável
+                super.updateTrust(sender, -0.2);
+            }
+        }
+        else if (reason.contains("Low trust level")){
+            if(accusedTrust < 0.3){                             // se o acusado é realmente pouco confiável
+                super.updateTrust(accusedAgent, -0.1);
+            }
+            else {                                              // se o acusado é mais confiavél o suficiente logo o sender é suspeito
+                super.updateTrust(sender, -0.1);
+            }
+        }
+        else {                                                          //razão não ajuda muito ent a trust é random mas eles ganham trust opostas
+            //Gives me a bad feeling
+            double adjustment = random.nextDouble(-0.1, 0.1);
+            super.updateTrust(accusedAgent, adjustment);                        
+            super.updateTrust(sender, -adjustment);
         }
     }
 
@@ -64,12 +85,36 @@ public class VillagerAgent extends AbstractPlayerAgent {
         double trustedTrust = super.trust.get(trustedAgent);
 
         if (senderTrust > 0.5 && trustedTrust < 0.5)
-            super.updateTrust(trustedAgent, 0.15);
+            super.updateTrust(trustedAgent, 0.1);
         else if (senderTrust > 0.5)
-            super.updateTrust(trustedAgent, 0.3);
+            super.updateTrust(trustedAgent, 0.2);
         else {
-            double deceptionChance = random.nextDouble(-0.2, 0.1);
+            double deceptionChance = random.nextDouble(-0.1, 0.05);
             super.updateTrust(trustedAgent, deceptionChance);
+        }
+
+        if (reason.contains("They trusted me before")){
+            if( Math.abs(trustedTrust - senderTrust) < 0.2 && 0.5 < senderTrust){  // se há pouca diferença entre trusts e sender é confiável   
+                super.updateTrust(trustedAgent, 0.2);
+            } else if (Math.abs(trustedTrust - senderTrust) < 0.2){             // se há pouca diferença entre trusts e sender é suspeito                     
+                super.updateTrust(sender, -0.2);
+            } else{                                                          // se há diferença entre trusts significante, provavelmente um villager considerado pouco trusted                                                                       
+                super.updateTrust(trustedAgent, 0.1);                 // a confiar no outro villager que tem trust alto ou o contrario
+            }
+        }
+        else if (reason.contains("High trust level")){
+            if(trustedTrust > 0.7){                             // se o trusted é realmente muito confiável
+                super.updateTrust(trustedAgent, 0.1);
+            }
+            else {                                              // se o trusted não é tão confiavél logo o sender é suspeito
+                super.updateTrust(sender, -0.1);
+            }
+        }
+        else {                                                          //razão não ajuda muito ent a trust é random mas eles ganham o mm trust 
+            //I feel they are reliable
+            double adjustment = random.nextDouble(-0.1, 0.1);
+            super.updateTrust(trustedAgent, adjustment);                        
+            super.updateTrust(sender, -adjustment);
         }
     }
 
@@ -167,11 +212,11 @@ public class VillagerAgent extends AbstractPlayerAgent {
 
     // 30% de chance de acusar alguém, 20% de chance de revelar o seu papel, 20% de chance de dizer em quem confia mais, 30% de ficar calado
     protected void discuss() {
-        if (currWerewolf != null && !currWerewolf.isEmpty())
+        if (currWerewolf != null && !currWerewolf.isEmpty() && super.trust.containsKey(currWerewolf))
             acuse(currWerewolf);
-        else if (currSeer != null && !currSeer.isEmpty())
+        else if (currSeer != null && !currSeer.isEmpty() && super.trust.containsKey(currSeer))
             trust(currSeer);
-        else if (currDoctor != null && !currDoctor.isEmpty())
+        else if (currDoctor != null && !currDoctor.isEmpty() && super.trust.containsKey(currDoctor))
             trust(currDoctor);
         else {
             Random random = new Random();
@@ -196,15 +241,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
                 target = name;
             }
         }
-        if (target != null) {
-            ACLMessage trustMsg = new ACLMessage(ACLMessage.INFORM);
-            trustMsg.setConversationId(MessageType.TRUST.name());
-            trustMsg.setContent(target + " is trustworthy");
-            for (String p : super.trust.keySet())
-                if (!p.equals(getLocalName()))
-                    trustMsg.addReceiver(new AID(p, AID.ISLOCALNAME));
-            send(trustMsg);
-        }
+        if (target != null) trust(target); // modularização da função
     }
 
     // acusa o agente em quem menos confia
@@ -226,7 +263,10 @@ public class VillagerAgent extends AbstractPlayerAgent {
     protected void acuse(String target) {
         ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
         msg.setConversationId(MessageType.ACCUSATION.name());
-        msg.setContent(target);
+        double targetTrust = super.trust.getOrDefault(target, 0.5);
+        boolean acusedMe = acusations.containsKey(target) && acusations.get(target).contains(getLocalName());
+        String reason = acusedMe ? "They accused me before" : targetTrust < 0.3 ? "Low trust level" : "Gives me a bad feeling";
+        msg.setContent(target + " " + reason);
         for (String player : super.trust.keySet())
             if (!player.equals(getLocalName()))
                 msg.addReceiver(new AID(player, AID.ISLOCALNAME));
@@ -236,7 +276,10 @@ public class VillagerAgent extends AbstractPlayerAgent {
     protected void trust(String target) {
         ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
         msg.setConversationId(MessageType.TRUST.name());
-        msg.setContent(target);
+        double targetTrust = super.trust.getOrDefault(target, 0.5);
+        boolean trustedMe = trustsMessages.containsKey(target) && trustsMessages.get(target).contains(getLocalName());
+        String reason = trustedMe ? "They trusted me before" : targetTrust > 0.7 ? "High trust level" : "I feel they are reliable";
+        msg.setContent(target + " " + reason);
         for (String player : super.trust.keySet())
             if (!player.equals(getLocalName()))
                 msg.addReceiver(new AID(player, AID.ISLOCALNAME));
@@ -283,7 +326,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
             if (acusations.containsKey(playerName))
                 for (String acusees : acusations.get(playerName))
                     if (super.wasWerewolf.contains(acusees)) {
-                        super.updateBelief(playerName, Role.SEER, roleProbs.get(Role.SEER) + 0.2); // incrementa a probabilidade de ser SEER
+                        super.updateBelief(playerName, Role.SEER, roleProbs.get(Role.SEER) + 0.3); // incrementa a probabilidade de ser SEER
                         if (this.myRole != Role.WEREWOLF) {
                             super.updateTrust(playerName, 0.3);
                         }
@@ -292,7 +335,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
             if (trustsMessages.containsKey(playerName))
                 for (String trusteds : trustsMessages.get(playerName))
                     if (this.wasProtected.contains(trusteds)) {
-                        super.updateBelief(playerName, Role.DOCTOR, roleProbs.get(Role.DOCTOR) + 0.2); // incrementa a probabilidade de ser DOCTOR
+                        super.updateBelief(playerName, Role.DOCTOR, roleProbs.get(Role.DOCTOR) + 0.3); // incrementa a probabilidade de ser DOCTOR
                         if (this.myRole != Role.WEREWOLF) {
                             super.updateTrust(playerName, 0.3);
                         }
