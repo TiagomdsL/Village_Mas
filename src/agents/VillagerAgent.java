@@ -300,15 +300,17 @@ public class VillagerAgent extends AbstractPlayerAgent {
 
             // Baseado em trust
             if (trustLevel > 0.7 && this.myRole != Role.WEREWOLF) {
-                // Alta confiança: mais provável ser DOCTOR, SEER ou VILLAGER
+                // Alta confiança: mais provável ser VILLAGER, DOCTOR, SEER
+                super.updateBelief(playerName, Role.VILLAGER, roleProbs.get(Role.VILLAGER) + 0.15);
                 super.updateBelief(playerName, Role.DOCTOR, roleProbs.get(Role.DOCTOR) + 0.10);
                 super.updateBelief(playerName, Role.SEER, roleProbs.get(Role.SEER) + 0.10);
                 super.updateBelief(playerName, Role.WEREWOLF, roleProbs.get(Role.WEREWOLF) - 0.15);
-                super.updateBelief(playerName, Role.WEREWOLF, roleProbs.get(Role.HUNTER) - 0.10);
+                super.updateBelief(playerName, Role.HUNTER, roleProbs.get(Role.HUNTER) - 0.10);
             } else if (trustLevel < 0.3 && this.myRole != Role.WEREWOLF) {
                 // Baixa confiança: mais provável ser WEREWOLF
                 super.updateBelief(playerName, Role.WEREWOLF, roleProbs.get(Role.WEREWOLF) + 0.30);
-                super.updateBelief(playerName, Role.VILLAGER, roleProbs.get(Role.HUNTER) + 0.10);
+                super.updateBelief(playerName, Role.HUNTER, roleProbs.get(Role.HUNTER) + 0.10);
+                super.updateBelief(playerName, Role.VILLAGER, roleProbs.get(Role.VILLAGER) - 0.05);
                 super.updateBelief(playerName, Role.DOCTOR, roleProbs.get(Role.DOCTOR) - 0.10);
                 super.updateBelief(playerName, Role.SEER, roleProbs.get(Role.SEER) - 0.10);
             } else if (this.myRole != Role.WEREWOLF) {
