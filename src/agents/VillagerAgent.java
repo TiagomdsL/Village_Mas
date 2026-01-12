@@ -3,6 +3,7 @@ package agents;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import model.MessageType;
+import model.Role;
 
 import java.util.*;
 
@@ -17,7 +18,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
     @Override
     protected void setup() {
         super.setup();
-        this.myRole = model.Role.VILLAGER;
+        this.myRole = Role.VILLAGER;
     }
 
     protected void handleAccusation(String content, String sender) {
@@ -269,9 +270,9 @@ public class VillagerAgent extends AbstractPlayerAgent {
     }
 
     protected void reactToAmbient() {
-        for (Map.Entry<String, Map<model.Role, Double>> entry : super.beliefs.entrySet()) {
+        for (Map.Entry<String, Map<Role, Double>> entry : super.beliefs.entrySet()) {
             String playerName = entry.getKey();
-            Map<model.Role, Double> roleProbs = entry.getValue();
+            Map<Role, Double> roleProbs = entry.getValue();
 
             // Pular a si próprio
             if (playerName.equals(getLocalName())) continue;
@@ -282,46 +283,46 @@ public class VillagerAgent extends AbstractPlayerAgent {
             if (acusations.containsKey(playerName))
                 for (String acusees : acusations.get(playerName))
                     if (super.wasWerewolf.contains(acusees)) {
-                        super.updateBelief(playerName, model.Role.SEER, 1); // quase certeza
-                        if (this.myRole != model.Role.WEREWOLF) {
-                            super.updateTrust(playerName, 0.5);
+                        super.updateBelief(playerName, Role.SEER, roleProbs.get(Role.SEER) + 0.2); // incrementa a probabilidade de ser SEER
+                        if (this.myRole != Role.WEREWOLF) {
+                            super.updateTrust(playerName, 0.3);
                         }
                     }
 
             if (trustsMessages.containsKey(playerName))
                 for (String trusteds : trustsMessages.get(playerName))
                     if (this.wasProtected.contains(trusteds)) {
-                        super.updateBelief(playerName, model.Role.DOCTOR, 1); // quase certeza
-                        if (this.myRole != model.Role.WEREWOLF) {
-                            super.updateTrust(playerName, 0.5);
+                        super.updateBelief(playerName, Role.DOCTOR, roleProbs.get(Role.DOCTOR) + 0.2); // incrementa a probabilidade de ser DOCTOR
+                        if (this.myRole != Role.WEREWOLF) {
+                            super.updateTrust(playerName, 0.3);
                         }
                     }
 
             // Baseado em trust
-            if (trustLevel > 0.7 && this.myRole != model.Role.WEREWOLF) {
+            if (trustLevel > 0.7 && this.myRole != Role.WEREWOLF) {
                 // Alta confiança: mais provável ser DOCTOR, SEER ou VILLAGER
-                super.updateBelief(playerName, model.Role.DOCTOR, roleProbs.get(model.Role.DOCTOR) + 0.10);
-                super.updateBelief(playerName, model.Role.SEER, roleProbs.get(model.Role.SEER) + 0.10);
-                super.updateBelief(playerName, model.Role.WEREWOLF, roleProbs.get(model.Role.WEREWOLF) - 0.15);
-                super.updateBelief(playerName, model.Role.WEREWOLF, roleProbs.get(model.Role.HUNTER) - 0.10);
-            } else if (trustLevel < 0.3 && this.myRole != model.Role.WEREWOLF) {
+                super.updateBelief(playerName, Role.DOCTOR, roleProbs.get(Role.DOCTOR) + 0.10);
+                super.updateBelief(playerName, Role.SEER, roleProbs.get(Role.SEER) + 0.10);
+                super.updateBelief(playerName, Role.WEREWOLF, roleProbs.get(Role.WEREWOLF) - 0.15);
+                super.updateBelief(playerName, Role.WEREWOLF, roleProbs.get(Role.HUNTER) - 0.10);
+            } else if (trustLevel < 0.3 && this.myRole != Role.WEREWOLF) {
                 // Baixa confiança: mais provável ser WEREWOLF
-                super.updateBelief(playerName, model.Role.WEREWOLF, roleProbs.get(model.Role.WEREWOLF) + 0.30);
-                super.updateBelief(playerName, model.Role.VILLAGER, roleProbs.get(model.Role.HUNTER) + 0.10);
-                super.updateBelief(playerName, model.Role.DOCTOR, roleProbs.get(model.Role.DOCTOR) - 0.10);
-                super.updateBelief(playerName, model.Role.SEER, roleProbs.get(model.Role.SEER) - 0.10);
-            } else if (this.myRole != model.Role.WEREWOLF) {
+                super.updateBelief(playerName, Role.WEREWOLF, roleProbs.get(Role.WEREWOLF) + 0.30);
+                super.updateBelief(playerName, Role.VILLAGER, roleProbs.get(Role.HUNTER) + 0.10);
+                super.updateBelief(playerName, Role.DOCTOR, roleProbs.get(Role.DOCTOR) - 0.10);
+                super.updateBelief(playerName, Role.SEER, roleProbs.get(Role.SEER) - 0.10);
+            } else if (this.myRole != Role.WEREWOLF) {
                 // Confiança média: ligeira inclinação para VILLAGER
-                super.updateBelief(playerName, model.Role.VILLAGER, roleProbs.get(model.Role.VILLAGER) + 0.05);
-                super.updateBelief(playerName, model.Role.WEREWOLF, roleProbs.get(model.Role.WEREWOLF) - 0.05);
+                super.updateBelief(playerName, Role.VILLAGER, roleProbs.get(Role.VILLAGER) + 0.05);
+                super.updateBelief(playerName, Role.WEREWOLF, roleProbs.get(Role.WEREWOLF) - 0.05);
             }
 
             // Se confia e foi mencionado como confiável em trusts
-            if (trustsMessages.containsValue(playerName) && trustLevel > 0.5 && this.myRole != model.Role.WEREWOLF) {
-                super.updateBelief(playerName, model.Role.VILLAGER, roleProbs.get(model.Role.VILLAGER) + 0.05);
+            if (trustsMessages.containsValue(playerName) && trustLevel > 0.5 && this.myRole != Role.WEREWOLF) {
+                super.updateBelief(playerName, Role.VILLAGER, roleProbs.get(Role.VILLAGER) + 0.05);
             }
-            if (this.myRole == model.Role.WEREWOLF) {
-                super.updateBelief(playerName, model.Role.VILLAGER, roleProbs.get(model.Role.VILLAGER) + 0.10);
+            if (this.myRole == Role.WEREWOLF) {
+                super.updateBelief(playerName, Role.VILLAGER, roleProbs.get(Role.VILLAGER) + 0.10);
             }
         }
 
@@ -333,15 +334,15 @@ public class VillagerAgent extends AbstractPlayerAgent {
         String maxWerewolf = null;
         double maxWerewolfProb = 0.0;
 
-        for (Map.Entry<String, Map<model.Role, Double>> entry : super.beliefs.entrySet()) {
+        for (Map.Entry<String, Map<Role, Double>> entry : super.beliefs.entrySet()) {
             String playerName = entry.getKey();
-            Map<model.Role, Double> roleProbs = entry.getValue();
+            Map<Role, Double> roleProbs = entry.getValue();
 
             if (playerName.equals(getLocalName())) continue;
 
-            double doctorProb = roleProbs.get(model.Role.DOCTOR);
-            double seerProb = roleProbs.get(model.Role.SEER);
-            double werewolfProb = roleProbs.get(model.Role.WEREWOLF);
+            double doctorProb = roleProbs.get(Role.DOCTOR);
+            double seerProb = roleProbs.get(Role.SEER);
+            double werewolfProb = roleProbs.get(Role.WEREWOLF);
 
             if (doctorProb > maxDoctorProb) {
                 maxDoctorProb = doctorProb;
