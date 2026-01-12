@@ -110,9 +110,8 @@ public class WerewolfAgent extends VillagerAgent {
         send(attack);
     }
 
-    // Não denuncia os outros werewolfs na votação, vota em quem menos confia que não seja werewolf
     @Override
-    protected void decideAction() {
+    protected void handleVote(String content, String sender) {
         String target = null;
         double minTrust = Double.POSITIVE_INFINITY;
         for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {

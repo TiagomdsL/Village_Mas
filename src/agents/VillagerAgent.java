@@ -128,29 +128,8 @@ public class VillagerAgent extends AbstractPlayerAgent {
         }
     }
 
-    protected void handleVote(String content, String sender) {
-        decideAction();
-    }
-
-    @Override
-    protected void handleSystem(String content) {
-        super.handleSystem(content);
-        if (content.contains("protected by doctor")) {
-            String protectedAgent = content
-                    .replace("The Player:", "")
-                    .replace("is Dead but was protected by doctor", "")
-                    .trim();
-            wasProtected.add(protectedAgent);
-        }
-        if (content.contains("Day phase started.")) {
-            reactToAmbient();
-            discuss();
-        }
-    }
-
     // escolhe o agente com menor trust (exclui a si próprio) e envia o voto ao GameMaster
-    @Override
-    protected void decideAction() {
+    protected void handleVote(String content, String sender) {
         String target = null;
         double minTrust = Double.POSITIVE_INFINITY;
         for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
@@ -170,6 +149,23 @@ public class VillagerAgent extends AbstractPlayerAgent {
             send(vote);
         }
     }
+
+    @Override
+    protected void handleSystem(String content) {
+        super.handleSystem(content);
+        if (content.contains("protected by doctor")) {
+            String protectedAgent = content
+                    .replace("The Player:", "")
+                    .replace("is Dead but was protected by doctor", "")
+                    .trim();
+            wasProtected.add(protectedAgent);
+        }
+        if (content.contains("Day phase started.")) {
+            reactToAmbient();
+            discuss();
+        }
+    }
+
 
     // 30% de chance de acusar alguém, 20% de chance de revelar o seu papel, 20% de chance de dizer em quem confia mais, 30% de ficar calado
     protected void discuss() {

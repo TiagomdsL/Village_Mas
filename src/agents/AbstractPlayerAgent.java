@@ -205,5 +205,4 @@ public abstract class AbstractPlayerAgent extends Agent {
     protected abstract void handleRoleClaim(String content, String sender); // Processa revelação de papel
     protected abstract void handleVote(String content, String sender);      // Processa voto
     protected abstract void handleTrust(String content, String sender);     // Processa confiança
-    protected abstract void decideAction();
 }
