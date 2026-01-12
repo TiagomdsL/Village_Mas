@@ -57,12 +57,6 @@ public class GameLauncher {
 
             AgentContainer container = rt.createMainContainer(profile);
 
-            // Criar agente de logging (sempre presente)
-            AgentController logger = container.createNewAgent(
-                    "Logger",
-                    "agents.LoggerAgent",
-                    null);
-            logger.start();
 
             List<String> playerNames = generatePlayerNames();
             // Gerar e atribuir roles localmente aqui para escolher a classe do agente a

@@ -1,17 +1,17 @@
 package agents;
 
-import java.util.Random;
-
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import model.MessageType;
 import model.Role;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class SeerAgent extends VillagerAgent {
 
-    protected Map<String, String> seerResults = new java.util.HashMap<>();
+    protected Map<String, String> seerResults = new HashMap<>();
     protected boolean needToAcuse = false;
     protected String accuseTarget = null;
     protected boolean needToProtect = false;
@@ -35,7 +35,7 @@ public class SeerAgent extends VillagerAgent {
     private void handleSeer(String sender) {
         String target = null;
         double minTrust = Double.POSITIVE_INFINITY;
-        for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
+        for (Map.Entry<String, Double> e : super.trust.entrySet()) {
             String name = e.getKey();
             double t = e.getValue();
             if (name.equals(getLocalName())) continue;

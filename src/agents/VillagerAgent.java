@@ -1,21 +1,18 @@
 package agents;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import model.MessageType;
 
+import java.util.*;
+
 public class VillagerAgent extends AbstractPlayerAgent {
-    protected Map<String, List<String>> acusations = new java.util.HashMap<>();
-    protected Map<String, List<String>> trusts = new java.util.HashMap<>();
+    protected Map<String, List<String>> acusations = new HashMap<>();
+    protected Map<String, List<String>> trustsMessages = new HashMap<>();
     protected String currSeer = "";
     protected String currDoctor = "";
     protected String currWerewolf = "";
-    protected List<String> wasProtected = new java.util.ArrayList<>();
+    protected List<String> wasProtected = new ArrayList<>();
 
     @Override
     protected void setup() {
@@ -58,9 +55,9 @@ public class VillagerAgent extends AbstractPlayerAgent {
         if (parts.length < 2) return; // Formato inválido
 
         String trustedAgent = parts[0];
-        if (!trusts.containsKey(sender)) trusts.put(sender, new ArrayList<>());
+        if (!trustsMessages.containsKey(sender)) trustsMessages.put(sender, new ArrayList<>());
 
-        trusts.get(sender).add(trustedAgent);
+        trustsMessages.get(sender).add(trustedAgent);
         String reason = parts[1]; // por enquanto n tem uso
         double senderTrust = super.trust.get(sender);
         double trustedTrust = super.trust.get(trustedAgent);
@@ -132,7 +129,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
     protected void handleVote(String content, String sender) {
         String target = null;
         double minTrust = Double.POSITIVE_INFINITY;
-        for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
+        for (Map.Entry<String, Double> e : super.trust.entrySet()) {
             String name = e.getKey();
             Double t = e.getValue();
             if (name.equals(getLocalName()) || t == null) continue;
@@ -189,7 +186,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
     protected void trustSomeone() {
         String target = null;
         double maxTrust = Double.NEGATIVE_INFINITY;
-        for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
+        for (Map.Entry<String, Double> e : super.trust.entrySet()) {
             String name = e.getKey();
             Double t = e.getValue();
             if (name.equals(getLocalName()) || t == null) continue;
@@ -213,7 +210,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
     protected void acuse() {
         String target = null;
         double minTrust = Double.POSITIVE_INFINITY;
-        for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
+        for (Map.Entry<String, Double> e : super.trust.entrySet()) {
             String name = e.getKey();
             Double t = e.getValue();
             if (name.equals(getLocalName()) || t == null) continue;
@@ -291,8 +288,8 @@ public class VillagerAgent extends AbstractPlayerAgent {
                         }
                     }
 
-            if (trusts.containsKey(playerName))
-                for (String trusteds : trusts.get(playerName))
+            if (trustsMessages.containsKey(playerName))
+                for (String trusteds : trustsMessages.get(playerName))
                     if (this.wasProtected.contains(trusteds)) {
                         super.updateBelief(playerName, model.Role.DOCTOR, 1); // quase certeza
                         if (this.myRole != model.Role.WEREWOLF) {
@@ -320,7 +317,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
             }
 
             // Se confia e foi mencionado como confiável em trusts
-            if (trusts.containsValue(playerName) && trustLevel > 0.5 && this.myRole != model.Role.WEREWOLF) {
+            if (trustsMessages.containsValue(playerName) && trustLevel > 0.5 && this.myRole != model.Role.WEREWOLF) {
                 super.updateBelief(playerName, model.Role.VILLAGER, roleProbs.get(model.Role.VILLAGER) + 0.05);
             }
             if (this.myRole == model.Role.WEREWOLF) {
@@ -336,9 +333,9 @@ public class VillagerAgent extends AbstractPlayerAgent {
         String maxWerewolf = null;
         double maxWerewolfProb = 0.0;
 
-        for (java.util.Map.Entry<String, java.util.Map<model.Role, Double>> entry : super.beliefs.entrySet()) {
+        for (Map.Entry<String, Map<model.Role, Double>> entry : super.beliefs.entrySet()) {
             String playerName = entry.getKey();
-            java.util.Map<model.Role, Double> roleProbs = entry.getValue();
+            Map<model.Role, Double> roleProbs = entry.getValue();
 
             if (playerName.equals(getLocalName())) continue;
 

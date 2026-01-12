@@ -4,8 +4,11 @@ import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import model.MessageType;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class DoctorAgent extends VillagerAgent {
 
@@ -24,7 +27,7 @@ public class DoctorAgent extends VillagerAgent {
 
     private void handleDoctor(String sender) {
         String protectedAgent;
-        java.util.List<String> candidates = new java.util.ArrayList<>();
+        List<String> candidates = new ArrayList<>();
         for (Map.Entry<String, Double> entry : super.trust.entrySet()) {
             String agent = entry.getKey();
             double trustValue = entry.getValue();
@@ -35,7 +38,7 @@ public class DoctorAgent extends VillagerAgent {
 
         if (candidates.isEmpty()) {
             // fallback: escolhe qualquer outro agente ao acaso (mesmo que trust <= 0.5)
-            java.util.List<String> allOthers = new java.util.ArrayList<>();
+            List<String> allOthers = new ArrayList<>();
             for (String a : super.trust.keySet())
                 if (!a.equals(getLocalName()))
                     allOthers.add(a);
@@ -43,11 +46,11 @@ public class DoctorAgent extends VillagerAgent {
             if (allOthers.isEmpty())
                 protectedAgent = null;
             else {
-                int idx = java.util.concurrent.ThreadLocalRandom.current().nextInt(allOthers.size());
+                int idx = ThreadLocalRandom.current().nextInt(allOthers.size());
                 protectedAgent = allOthers.get(idx);
             }
         } else {
-            int idx = java.util.concurrent.ThreadLocalRandom.current().nextInt(candidates.size());
+            int idx = ThreadLocalRandom.current().nextInt(candidates.size());
             protectedAgent = candidates.get(idx);
         }
 
@@ -55,7 +58,7 @@ public class DoctorAgent extends VillagerAgent {
             ACLMessage protectMsg = new ACLMessage(ACLMessage.INFORM);
             protectMsg.setConversationId(MessageType.DOCTOR_PROTECT.name());
             protectMsg.setContent(protectedAgent);
-            protectMsg.addReceiver(new jade.core.AID(sender, AID.ISLOCALNAME)); // para o GameMaster e ser escalavel
+            protectMsg.addReceiver(new AID(sender, AID.ISLOCALNAME)); // para o GameMaster e ser escalavel
             send(protectMsg);
             System.out.println("Doctor " + getLocalName() + " is protecting " + protectedAgent);
         }

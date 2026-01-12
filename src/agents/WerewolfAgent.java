@@ -4,10 +4,7 @@ import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import model.MessageType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class WerewolfAgent extends VillagerAgent {
     private List<String> wolves;
@@ -52,7 +49,7 @@ public class WerewolfAgent extends VillagerAgent {
     private void handleWerewolfQuestion(String sender) {
         String target = null;
         double minTrust = Double.POSITIVE_INFINITY;
-        for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
+        for (Map.Entry<String, Double> e : super.trust.entrySet()) {
             String name = e.getKey();
             double t = e.getValue();
             if (name.equals(getLocalName())) continue;
@@ -82,7 +79,7 @@ public class WerewolfAgent extends VillagerAgent {
     private void handleWerewolfAttack(String sender) {
         String target = null;
         double maxTrust = Double.NEGATIVE_INFINITY;
-        for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
+        for (Map.Entry<String, Double> e : super.trust.entrySet()) {
             String name = e.getKey();
             double t = e.getValue();
             if (name.equals(getLocalName())) continue;
@@ -114,7 +111,7 @@ public class WerewolfAgent extends VillagerAgent {
     protected void handleVote(String content, String sender) {
         String target = null;
         double minTrust = Double.POSITIVE_INFINITY;
-        for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
+        for (Map.Entry<String, Double> e : super.trust.entrySet()) {
             String name = e.getKey();
             Double t = e.getValue();
             if (name.equals(getLocalName()) || t == null || this.wolves.contains(name)) continue;
@@ -174,7 +171,7 @@ public class WerewolfAgent extends VillagerAgent {
     protected void acuse() {
         String target = null;
         double minTrust = Double.POSITIVE_INFINITY;
-        for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
+        for (Map.Entry<String, Double> e : super.trust.entrySet()) {
             String name = e.getKey();
             Double t = e.getValue();
             if (name.equals(getLocalName()) || t == null || this.wolves.contains(name)) continue;
@@ -199,7 +196,7 @@ public class WerewolfAgent extends VillagerAgent {
     protected void trustSomeone() {
         String target = null;
         double maxTrust = Double.NEGATIVE_INFINITY;
-        for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
+        for (Map.Entry<String, Double> e : super.trust.entrySet()) {
             String name = e.getKey();
             Double t = e.getValue();
             if (name.equals(getLocalName()) || t == null || this.wolves.contains(name)) continue;

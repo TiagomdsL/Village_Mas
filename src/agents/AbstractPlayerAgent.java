@@ -11,6 +11,7 @@ import jade.lang.acl.ACLMessage;
 import model.MessageType;
 import model.Role;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ public abstract class AbstractPlayerAgent extends Agent {
     protected Map<String, Double> trust = new HashMap<>();
 
     // Lista de mortos que já foram revelados como lobisomens
-    protected List<String> wasWerewolf = new java.util.ArrayList<>();
+    protected List<String> wasWerewolf = new ArrayList<>();
 
 
     @Override

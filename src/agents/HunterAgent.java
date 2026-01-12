@@ -1,11 +1,11 @@
 package agents;
 
-import java.util.Random;
-
 import jade.core.AID;
-import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import model.MessageType;
+
+import java.util.Map;
+import java.util.Random;
 
 public class HunterAgent extends VillagerAgent {
 
@@ -27,7 +27,7 @@ public class HunterAgent extends VillagerAgent {
     private void handleHunter(String sender) {
         String target = null;
         double minTrust = Double.POSITIVE_INFINITY;
-        for (java.util.Map.Entry<String, Double> e : super.trust.entrySet()) {
+        for (Map.Entry<String, Double> e : super.trust.entrySet()) {
             String name = e.getKey();
             double t = e.getValue();
             if (name.equals(getLocalName())) continue;
