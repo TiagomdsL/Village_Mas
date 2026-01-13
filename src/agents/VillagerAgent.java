@@ -121,7 +121,7 @@ public class VillagerAgent extends AbstractPlayerAgent {
             //I feel they are reliable
             double adjustment = random.nextDouble(-0.1, 0.1);
             super.updateTrust(trustedAgent, adjustment);                        
-            super.updateTrust(sender, -adjustment);
+            super.updateTrust(sender, adjustment);
         }
     }
 
