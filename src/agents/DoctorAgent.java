@@ -37,7 +37,7 @@ public class DoctorAgent extends VillagerAgent {
         }
 
         if (candidates.isEmpty()) {
-            // fallback: escolhe qualquer outro agente ao acaso (mesmo que trust <= 0.5)
+            // fallback: escolhe qualquer outro agente ao acaso se não tiver candidatos confiáveis
             List<String> allOthers = new ArrayList<>();
             for (String a : super.trust.keySet())
                 if (!a.equals(getLocalName()))
@@ -46,11 +46,11 @@ public class DoctorAgent extends VillagerAgent {
             if (allOthers.isEmpty())
                 protectedAgent = null;
             else {
-                int idx = ThreadLocalRandom.current().nextInt(allOthers.size());
+                int idx = (int) (Math.random() * allOthers.size());
                 protectedAgent = allOthers.get(idx);
             }
-        } else {
-            int idx = ThreadLocalRandom.current().nextInt(candidates.size());
+        } else { // escolhe aleatoriamente entre os candidatos confiáveis
+            int idx = (int) (Math.random() * candidates.size());
             protectedAgent = candidates.get(idx);
         }
 
