@@ -136,6 +136,8 @@ public class GameMasterAgent extends Agent {
             killByVote("DAY");
 
             broadcastSystem("Day phase ended.", MessageType.SYSTEM);
+
+            round++;
             GamePhaseBehaviour fsm = (GamePhaseBehaviour) getParent();
             fsm.registerState(new NightPhaseBehaviour(myAgent, 1000), GamePhase.NIGHT.toString()); // para garantir que a noite seja a próxima fase devido aos tickes após a primeira noite
             return isEnded();
@@ -202,7 +204,6 @@ public class GameMasterAgent extends Agent {
             GamePhaseBehaviour fsm = (GamePhaseBehaviour) getParent();
             fsm.registerState(new DayPhaseBehaviour(myAgent, 1000), GamePhase.Day.toString()); // para garantir que o dia seja a próxima fase devido aos tickes após o primeir dia
 
-            round++;
             return isEnded();
         }
     }

@@ -78,19 +78,6 @@ public class SeerAgent extends VillagerAgent {
 
     @Override
     protected void discuss() {
-        // guarda as pessoas que sejam werewolfs ou doctors conhecidos para acusar e proteger respetivamente
-        for (String player : super.trust.keySet())
-            if (seerResults.containsKey(player) && seerResults.get(player).equals(Role.WEREWOLF.name())) {
-                needToAcuse = true;
-                accuseTarget = player;
-            }
-
-        for (String player : super.trust.keySet())
-            if (seerResults.containsKey(player) && seerResults.get(player).equals(Role.DOCTOR.name())) {
-                needToProtect = true;
-                protectTarget = player;
-            }
-
         if (needToAcuse && accuseTarget != null) {  // prioriza acusar werewolfs conhecidos
             acuse(accuseTarget);
             needToAcuse = false;
