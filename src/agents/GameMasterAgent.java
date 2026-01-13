@@ -466,7 +466,7 @@ public class GameMasterAgent extends Agent {
 
     private void saveGameStateToFile() {
         try {
-            Path path = Paths.get("game_state.json");
+            Path path = Paths.get("stats/logs/game_state" + System.currentTimeMillis() + ".json");
             Files.write(
                     path,
                     gameState.toString(2).getBytes(StandardCharsets.UTF_8)
