@@ -13,6 +13,8 @@ import java.util.Collections;
 
 import model.Role;
 
+import static jade.tools.rma.StartDialog.getArguments;
+
 /**
  * Classe responsável por lançar um jogo de The Village
  * com configurações totalmente customizáveis.
@@ -40,7 +42,19 @@ public class GameLauncher {
     /* ========================================================== */
 
     public static void main(String[] args) {
-        new GameLauncher().startGame();
+        GameLauncher launcher = new GameLauncher();
+
+        // Se passou argumento no IntelliJ, define o número de jogadores
+        if (args.length > 0) {
+            try {
+                int p = Integer.parseInt(args[0]);
+                launcher.setNumPlayers(p);
+            } catch (NumberFormatException e) {
+                System.err.println("Argumento inválido, deve ser um número. Usando o valor padrão de 20");
+            }
+        }
+
+        launcher.startGame();
     }
 
     /**
@@ -54,10 +68,9 @@ public class GameLauncher {
 
             AgentContainer container = rt.createMainContainer(profile);
 
-
-            List<String> playerNames = generatePlayerNames();
             // Gerar e atribuir roles localmente aqui para escolher a classe do agente a
             // criar
+            List<String> playerNames = generatePlayerNames(this.numPlayers);
             List<Role> rolePool = buildRolePool(playerNames.size());
             Random rnd = new Random(randomSeed);
             Collections.shuffle(rolePool, rnd);
@@ -95,12 +108,14 @@ public class GameLauncher {
     /**
      * Gera nomes dos jogadores.
      */
-    private List<String> generatePlayerNames() {
+    private List<String> generatePlayerNames(int numP) {
         List<String> players = new ArrayList<>();
-        for (int i = 1; i <= numPlayers; i++) {
+        for (int i = 1; i <= numP; i++)
             players.add("Player" + i);
-        }
         return players;
+    }
+    private List<String> generatePlayerNames() {
+        return generatePlayerNames(numPlayers);
     }
 
     /**
