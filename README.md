@@ -21,9 +21,9 @@ Antes de executar o projeto, certifique-se de ter:
 
 ## Execução
 
-O jogo é iniciado através do **GameLauncher.java** e aceita **um argumento**, que é o **número de jogadores**
+O jogo é iniciado através do **GameLauncher.java** e aceita **um argumento**, que é o **número de jogadores.**, caso nenhum argumento seja passado, haverá por padrão 20 jogadores  
 A distribuição de roles é feita automáticamente   
-O jogo começa e é guardado um JSON com os dados da partida 
+O jogo começa e quando termina a partida, é guardado um JSON com os dados da partida
 
 ## Dados 
 Na pasta stats existe um script python que gera tabelas e plots dos JSONs log das rondas jogadas, as tabelas e plots em png e uma pasta onde os logs são guardados nomeadamente a pasta data
