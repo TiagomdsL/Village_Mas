@@ -30,12 +30,9 @@ public class GameLauncher {
     private double doctorRatio = 0.1 + (Math.random() * 2 - 1) * 0.03;
     private double hunterRatio = 0.1 + (Math.random() * 2 - 1) * 0.03;
 
-    // Comunicação
-    private int maxPublicMessagesPerDay = 2; // ex: 1 para comunicação restrita
 
     // Jogo
     private int maxRounds = 20;
-    private boolean demoMode = false;
 
     // Reprodutibilidade
     private long randomSeed = System.currentTimeMillis();
@@ -164,10 +161,8 @@ public class GameLauncher {
         System.out.println("Seer enabled: " + seerRatio);
         System.out.println("Doctor enabled: " + doctorRatio);
         System.out.println("Hunter enabled: " + hunterRatio);
-        System.out.println("Message limit/day: " + maxPublicMessagesPerDay);
         System.out.println("Max rounds: " + maxRounds);
         System.out.println("Random seed: " + randomSeed);
-        System.out.println("Demo mode: " + demoMode);
     }
 
     /* ================= SETTERS (para experimentos) ================= */
@@ -194,10 +189,6 @@ public class GameLauncher {
     }
 
 
-    public GameLauncher setMessageLimit(int limit) {
-        this.maxPublicMessagesPerDay = limit;
-        return this;
-    }
 
     public GameLauncher setMaxRounds(int rounds) {
         this.maxRounds = rounds;
