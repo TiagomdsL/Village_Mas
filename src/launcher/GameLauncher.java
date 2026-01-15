@@ -13,7 +13,6 @@ import java.util.Collections;
 
 import model.Role;
 
-import static jade.tools.rma.StartDialog.getArguments;
 
 /**
  * Classe responsável por lançar um jogo de The Village
@@ -44,7 +43,6 @@ public class GameLauncher {
     public static void main(String[] args) {
         GameLauncher launcher = new GameLauncher();
 
-        // Se passou argumento no IntelliJ, define o número de jogadores
         if (args.length > 0) {
             try {
                 int p = Integer.parseInt(args[0]);
@@ -68,8 +66,7 @@ public class GameLauncher {
 
             AgentContainer container = rt.createMainContainer(profile);
 
-            // Gerar e atribuir roles localmente aqui para escolher a classe do agente a
-            // criar
+            // Gerar e atribuir roles localmente aqui para escolher a classe do agente a criar
             List<String> playerNames = generatePlayerNames(this.numPlayers);
             List<Role> rolePool = buildRolePool(playerNames.size());
             Random rnd = new Random(randomSeed);
@@ -87,7 +84,7 @@ public class GameLauncher {
                 agent.start();
             }
 
-            // Criar Game Master (sem args; GameMaster obtém players/roles via DF)
+            // Criar Game Master
             AgentController gm = container.createNewAgent(
                     "GameMaster",
                     "agents.GameMasterAgent",
@@ -146,7 +143,6 @@ public class GameLauncher {
         while (pool.size() < playersCount)
             pool.add(Role.VILLAGER);
 
-        // se sobrar (menos jogadores que roles desejadas) aparar extras (remove do fim)
         while (pool.size() > playersCount)
             pool.remove(pool.size() - 1);
 
